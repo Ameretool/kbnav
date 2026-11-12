@@ -8,312 +8,164 @@
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: { primary: '#6366f1' }
-                }
-            }
+            theme: { extend: { colors: { primary: '#6366f1' } } }
         }
     </script>
     <style>
-        /* 沉浸式背景 */
         body {
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            transition: background 0.5s ease, background-image 0.5s ease;
-            -webkit-tap-highlight-color: transparent;
-            position: relative;
-            /* 默认给一个好看的深色渐变，防止刚加载时全白 */
-            background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            transition: background 0.5s ease; -webkit-tap-highlight-color: transparent;
+            position: relative; background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);
         }
-        
-        /* 核心遮罩：强制保证文字在亮色/暗色背景下都能看清 */
+        /* 极简遮罩，保证文字在任何背景下都清晰 */
         body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.25); 
-            z-index: -1;
-            transition: background 0.5s;
+            content: ''; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.3); z-index: -1;
         }
-        html:not(.dark) body::before {
-            background: rgba(255, 255, 255, 0.15);
-        }
+        html:not(.dark) body::before { background: rgba(255, 255, 255, 0.2); }
 
-        /* 毛玻璃 */
-        .glass {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-        .dark .glass {
-            background: rgba(20, 20, 25, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
+        .glass { background: rgba(255,255,255,0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.4); }
+        .dark .glass { background: rgba(20,20,25,0.65); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); }
         
         ::-webkit-scrollbar { width: 0px; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 图标底板：强制白底，防止黑色图标在夜间模式下看不清 */
-        .icon-box { 
-            position: relative; 
-            overflow: hidden; 
-            background: rgba(255, 255, 255, 0.9);
-        }
+        /* 强制白底图标，防止黑夜模式看不清 */
+        .icon-box { position: relative; overflow: hidden; background: rgba(255,255,255,0.9); }
         .icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2px; }
 
-        /* 手风琴动画 */
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .accordion-content.open {
-            max-height: 800px;
-            transition: max-height 0.3s ease-in;
-        }
-        
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-content.open { max-height: 800px; transition: max-height 0.3s ease-in; }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .animate-pop { animation: pop 0.3s ease; }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-20 px-3 md:px-8">
 
-    <!-- 顶部标题 -->
-    <div class="text-center mb-8 md:mb-12 flex flex-col items-center justify-center gap-1 md:gap-3 w-full max-w-4xl">
+    <div class="text-center mb-8 flex flex-col items-center justify-center gap-1 w-full max-w-4xl">
         <h1 class="text-3xl md:text-5xl font-bold tracking-wider drop-shadow-md">Search Hub</h1>
-        <div class="flex items-center justify-center gap-4 text-xl md:text-3xl font-light opacity-90 mt-1 md:mt-2">
-            <span id="clock">00:00</span>
-        </div>
+        <div class="text-xl md:text-3xl font-light opacity-90 mt-1"><span id="clock">00:00</span></div>
         <p class="text-xs md:text-sm opacity-70" id="date-text">Loading...</p>
     </div>
 
-    <!-- 搜索区域 -->
     <div class="w-full max-w-2xl glass rounded-full flex items-center shadow-2xl relative z-10 p-1.5 md:p-2">
         <div class="relative group shrink-0">
-            <button id="engine-btn" class="flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition cursor-pointer">
+            <button id="engine-btn" class="flex items-center gap-1 px-3 py-1.5 hover:bg-black/10 rounded-full transition cursor-pointer">
                 <span id="current-engine-icon" class="text-lg">🌐</span>
                 <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-36 md:w-48 glass rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 overflow-hidden">
-            </div>
+            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-36 md:w-48 glass rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 overflow-hidden"></div>
         </div>
-        <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500 dark:placeholder-gray-400" placeholder="Enter search content...">
-        <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-primary text-white rounded-full hover:bg-indigo-600 transition shadow-lg flex items-center justify-center">
-            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </button>
+        <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500" placeholder="Enter search content...">
+        <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-primary text-white rounded-full hover:bg-indigo-600 transition shadow-lg"><svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
     </div>
 
-    <!-- 快捷链接区域 -->
-    <div class="w-full max-w-5xl mt-10 md:mt-16 z-10 px-1 md:px-0">
-        <h2 class="text-sm md:text-base font-semibold mb-4 opacity-90 flex items-center gap-2" id="app-title">
-            My Apps
-        </h2>
+    <div class="w-full max-w-5xl mt-10 z-10 px-1 md:px-0">
+        <h2 class="text-sm md:text-base font-semibold mb-4 opacity-90" id="app-title">My Apps</h2>
         <div id="app-grid"></div>
-        
         <div class="mt-6 flex justify-center">
-             <button id="add-app-btn" class="glass rounded-xl px-6 py-2 flex items-center justify-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition border-dashed border border-gray-400 dark:border-gray-500 cursor-pointer text-sm opacity-80">
-                <span class="text-lg">+</span>
-                <span id="add-btn-text">Add New</span>
+             <button id="add-app-btn" class="glass rounded-xl px-6 py-2 flex items-center justify-center gap-2 hover:bg-black/5 transition border-dashed border border-gray-400 cursor-pointer text-sm opacity-80">
+                <span class="text-lg">+</span><span id="add-btn-text">Add New</span>
             </button>
         </div>
     </div>
 
-    <!-- 右下角设置按钮 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
-        <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </button>
+        <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
         
-        <!-- 设置面板 -->
         <div id="settings-panel" class="absolute bottom-14 right-0 w-72 glass rounded-2xl p-5 shadow-2xl hidden flex-col gap-5 border border-white/20 max-h-[80vh] overflow-y-auto hide-scrollbar">
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium" id="set-layout">Layout Style</span>
                 <div class="grid grid-cols-3 gap-2">
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="grid">Grid</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="banner">Banner</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="pill">Pill</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="grid">Grid</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="banner">Banner</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="pill">Pill</button>
                 </div>
             </div>
-
             <div class="flex justify-between items-center border-t border-gray-400/30 pt-4">
                 <span class="text-sm font-medium" id="set-lang">Language</span>
-                <button id="toggle-lang" class="px-2 py-1 bg-black/10 dark:bg-white/10 rounded text-xs hover:bg-black/20 transition">EN / 中</button>
+                <button id="toggle-lang" class="px-2 py-1 bg-black/10 rounded text-xs">EN / 中</button>
             </div>
             <div class="flex justify-between items-center">
                 <span class="text-sm font-medium" id="set-theme">Dark Mode</span>
-                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-primary relative transition-colors">
-                    <div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div>
-                </button>
+                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-primary relative transition-colors"><div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div></button>
             </div>
-            
             <div class="flex flex-col gap-2 border-t border-gray-400/30 pt-4">
                 <span class="text-sm font-medium" id="set-bg">Background</span>
-                <div class="flex justify-between gap-2 px-1 my-1" id="gradient-presets">
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);" onclick="setBgPreset('linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')"></button>
+                <div class="flex justify-between gap-2 px-1 my-1">
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);" onclick="setBgPreset('linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')"></button>
                 </div>
-                <div class="flex gap-2 mt-1">
-                    <label class="w-full text-center cursor-pointer bg-black/10 dark:bg-white/10 rounded-md py-1.5 text-xs hover:bg-black/20 transition">
-                        <span id="bg-upload-text">Upload Custom Img</span>
-                        <input type="file" id="bg-upload" class="hidden" accept="image/*">
-                    </label>
-                </div>
+                <label class="w-full text-center cursor-pointer bg-black/10 rounded-md py-1.5 text-xs">
+                    <span id="bg-upload-text">Upload Custom Img</span><input type="file" id="bg-upload" class="hidden" accept="image/*">
+                </label>
             </div>
-
             <div class="border-t border-gray-400/30 pt-4">
-                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20">
-                    Reset All Data
-                </button>
+                <button id="reset-btn" class="w-full bg-red-500/10 text-red-500 rounded-lg py-2 text-xs font-medium border border-red-500/20">Reset All Data</button>
             </div>
         </div>
     </div>
 
-    <!-- 添加链接模态框 -->
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
-        <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] md:max-h-[80vh]">
+        <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-lg font-bold" id="modal-title">Add New App</h3>
-                <button id="modal-close-x" class="p-2 opacity-50 hover:opacity-100">✕</button>
+                <button id="modal-close-x" class="p-2 opacity-50">✕</button>
             </div>
-            
-            <div class="flex-1 overflow-y-auto hide-scrollbar mb-4 pr-1 border-b border-gray-400/20 pb-4" id="accordion-container">
-                <!-- 动态渲染分类 -->
-            </div>
-
+            <div class="flex-1 overflow-y-auto hide-scrollbar mb-4 pr-1 border-b border-gray-400/20 pb-4" id="accordion-container"></div>
             <div class="flex flex-col gap-3 shrink-0 pt-2">
-                <input type="text" id="app-name" placeholder="Name (Custom)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
-                <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
-                <div class="flex justify-end gap-3 mt-2">
-                    <button id="modal-save" class="w-full py-2.5 bg-primary text-white rounded-xl hover:bg-indigo-600 text-sm font-medium shadow-lg transition">Save Custom Link</button>
-                </div>
+                <input type="text" id="app-name" placeholder="Name (Custom)" class="w-full bg-black/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary">
+                <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary">
+                <button id="modal-save" class="w-full py-2.5 bg-primary text-white rounded-xl hover:bg-indigo-600 text-sm font-medium shadow-lg mt-1">Save Custom Link</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // 1. 存储引擎 (双保险：Cookie + LocalStorage)
-        // ==========================================
+        // 核心双引擎存储
         const storage = {
-            set: function(key, value) {
-                try { localStorage.setItem(key, value); } catch(e) {}
-                document.cookie = `${key}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+            set: (k, v) => { try { localStorage.setItem(k, v); } catch(e){}; document.cookie = `${k}=${encodeURIComponent(v)}; max-age=31536000; path=/; SameSite=Lax`; },
+            get: (k) => {
+                let v = null; try { v = localStorage.getItem(k); } catch(e){}
+                if (!v) { const m = document.cookie.match(new RegExp('(^| )' + k + '=([^;]+)')); if (m) v = decodeURIComponent(m[2]); }
+                return v;
             },
-            get: function(key) {
-                let val = null;
-                try { val = localStorage.getItem(key); } catch(e) {}
-                if (!val) {
-                    const match = document.cookie.match(new RegExp('(^| )' + key + '=([^;]+)'));
-                    if (match) val = decodeURIComponent(match[2]);
-                }
-                return val;
-            },
-            remove: function(key) {
-                try { localStorage.removeItem(key); } catch(e) {}
-                document.cookie = `${key}=; max-age=-1; path=/`;
-            },
-            clear: function() {
-                try { localStorage.clear(); } catch(e) {}
-                document.cookie.split(";").forEach(function(c) { 
-                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-                });
+            remove: (k) => { try { localStorage.removeItem(k); } catch(e){}; document.cookie = `${k}=; max-age=-1; path=/`; },
+            clear: () => {
+                try { localStorage.clear(); } catch(e){}
+                document.cookie.split(";").forEach(c => { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
             }
         };
 
-        // ==========================================
-        // 2. 多语言字典
-        // ==========================================
         const i18n = {
-            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", cancel: "Cancel", save: "Save Custom Link", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
-            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", cancel: "取消", save: "保存自定义链接", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
+            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", save: "Save Custom Link", resetConfirm: "Are you sure you want to clear all data?" },
+            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", save: "保存自定义链接", resetConfirm: "确定要清空所有数据吗？" }
         };
         let currentLang = storage.get('lang') || 'en';
 
-        // ==========================================
-        // 3. 搜索引擎配置
-        // ==========================================
         const engines = [
             { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
             { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
-            { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: '🦆' },
             { id: 'baidu', name: 'Baidu 百度', url: 'https://www.baidu.com/s?wd=', icon: '🐾' },
-            { id: 'github', name: 'GitHub', url: 'https://github.com/search?q=', icon: '🐙' }
+            { id: 'ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: '🦆' }
         ];
         let currentEngine = engines[0];
         const $ = id => document.getElementById(id);
 
-        // ==========================================
-        // 4. 预设网站库 (分类)
-        // ==========================================
         const presetCategories = [
-            {
-                category: "AI Tools",
-                color: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30",
-                sites: [
-                    { name: 'ChatGPT', url: 'https://chatgpt.com' },
-                    { name: 'Claude', url: 'https://claude.ai' },
-                    { name: 'Gemini', url: 'https://gemini.google.com' },
-                    { name: 'Midjourney', url: 'https://midjourney.com' },
-                    { name: 'Kimi', url: 'https://kimi.moonshot.cn' }
-                ]
-            },
-            {
-                category: "Developer",
-                color: "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30",
-                sites: [
-                    { name: 'GitHub', url: 'https://github.com' },
-                    { name: 'Cloudflare', url: 'https://dash.cloudflare.com' },
-                    { name: 'Vercel', url: 'https://vercel.com' },
-                    { name: 'StackOverflow', url: 'https://stackoverflow.com' },
-                    { name: 'Figma', url: 'https://figma.com' }
-                ]
-            },
-            {
-                category: "Media & Social",
-                color: "bg-pink-500/20 text-pink-700 dark:text-pink-300 border-pink-500/30",
-                sites: [
-                    { name: 'YouTube', url: 'https://youtube.com' },
-                    { name: 'Bilibili', url: 'https://bilibili.com' },
-                    { name: 'Netflix', url: 'https://netflix.com' },
-                    { name: 'Twitter/X', url: 'https://x.com' },
-                    { name: 'Reddit', url: 'https://reddit.com' }
-                ]
-            },
-            {
-                category: "China Apps",
-                color: "bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30",
-                sites: [
-                    { name: '知乎', url: 'https://zhihu.com' },
-                    { name: '微博', url: 'https://weibo.com' },
-                    { name: '小红书', url: 'https://xiaohongshu.com' },
-                    { name: '淘宝', url: 'https://taobao.com' },
-                    { name: '京东', url: 'https://jd.com' }
-                ]
-            }
+            { category: "AI Tools", color: "bg-purple-500/20 text-purple-700 border-purple-500/30", sites: [ { name: 'ChatGPT', url: 'https://chatgpt.com' }, { name: 'Claude', url: 'https://claude.ai' }, { name: 'Gemini', url: 'https://gemini.google.com' } ] },
+            { category: "Developer", color: "bg-blue-500/20 text-blue-700 border-blue-500/30", sites: [ { name: 'GitHub', url: 'https://github.com' }, { name: 'Cloudflare', url: 'https://dash.cloudflare.com' }, { name: 'Vercel', url: 'https://vercel.com' } ] },
+            { category: "Media", color: "bg-pink-500/20 text-pink-700 border-pink-500/30", sites: [ { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' }, { name: 'Netflix', url: 'https://netflix.com' } ] }
         ];
 
-        // ==========================================
-        // 5. 状态与初始化
-        // ==========================================
-        let currentLayout = storage.get('layout') || 'grid'; // 默认使用宫格
-        const defaultApps = [
-            { name: 'GitHub', url: 'https://github.com' },
-            { name: 'YouTube', url: 'https://youtube.com' },
-            { name: 'Bilibili', url: 'https://bilibili.com' },
-            { name: 'ChatGPT', url: 'https://chatgpt.com' }
-        ];
+        // 默认设为 banner 模式
+        let currentLayout = storage.get('layout') || 'banner'; 
+        const defaultApps = [ { name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' }, { name: 'ChatGPT', url: 'https://chatgpt.com' } ];
+        
         let apps = defaultApps;
-        try {
-            const savedApps = storage.get('myApps');
-            if(savedApps) apps = JSON.parse(savedApps);
-        } catch(e) {}
+        try { const s = storage.get('myApps'); if(s) apps = JSON.parse(s); } catch(e) {}
 
         function updateClock() {
             const now = new Date();
@@ -338,214 +190,155 @@
             $('modal-save').textContent = d.save;
         }
 
-        // ==========================================
-        // 6. 图标获取与渲染
-        // ==========================================
         function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
         
         function getIcon(url, size="w-8 h-8", textSize="text-xs") {
             const domain = getDomain(url);
-            // 三级容错方案
-            const googleIcon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-            const ddgIcon = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-            const horseIcon = `https://icon.horse/icon/${domain}`;
-            const firstLetter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
-
+            const img1 = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+            const img2 = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+            const img3 = `https://icon.horse/icon/${domain}`;
+            const letter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
             return `
                 <div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
-                    <img src="${googleIcon}" 
-                         onerror="this.onerror=function(){this.src='${ddgIcon}'; this.onerror=function(){this.src='${horseIcon}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${firstLetter}</span>';}};};">
-                </div>
-            `;
+                    <img src="${img1}" onerror="this.onerror=function(){this.src='${img2}'; this.onerror=function(){this.src='${img3}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${letter}</span>';}};};">
+                </div>`;
         }
 
         function renderApps() {
             const grid = $('app-grid');
-            grid.className = ''; 
+            grid.className = currentLayout === 'grid' ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6" :
+                           currentLayout === 'banner' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" :
+                           "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
             grid.innerHTML = '';
             
-            if (currentLayout === 'grid') {
-                grid.className = "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6";
-            } else if (currentLayout === 'banner') {
-                grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4";
-            } else if (currentLayout === 'pill') {
-                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
-            }
-
             apps.forEach((app, index) => {
                 const card = document.createElement('div');
                 card.onclick = () => window.open(app.url, '_blank');
                 card.title = app.name;
 
                 if (currentLayout === 'grid') {
-                    card.className = "flex flex-col items-center justify-center gap-1.5 cursor-pointer group relative p-2 hover:bg-white/10 dark:hover:bg-black/20 rounded-xl transition";
-                    card.innerHTML = `
-                        ${getIcon(app.url, "w-12 h-12 md:w-14 md:h-14", "text-lg")}
-                        <span class="text-[11px] md:text-xs font-medium text-center w-full truncate opacity-90">${app.name}</span>
-                        <button class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn" data-index="${index}">✕</button>
-                    `;
+                    card.className = "flex flex-col items-center justify-center gap-1.5 cursor-pointer group relative p-2 hover:bg-white/10 rounded-xl transition";
+                    card.innerHTML = `${getIcon(app.url, "w-12 h-12 md:w-14 md:h-14", "text-lg")}<span class="text-[11px] md:text-xs font-medium text-center w-full truncate opacity-90">${app.name}</span><button class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn" data-index="${index}">✕</button>`;
                 } else if (currentLayout === 'banner') {
                     card.className = "glass rounded-xl p-3 flex items-center gap-3 cursor-pointer group relative hover:-translate-y-1 hover:shadow-xl transition-all";
-                    card.innerHTML = `
-                        ${getIcon(app.url, "w-8 h-8", "text-sm")}
-                        <span class="font-medium text-sm truncate flex-1">${app.name}</span>
-                        <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>
-                    `;
-                } else if (currentLayout === 'pill') {
+                    card.innerHTML = `${getIcon(app.url, "w-8 h-8", "text-sm")}<span class="font-medium text-sm truncate flex-1">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
+                } else {
                     card.className = "glass rounded-full px-4 py-2 flex items-center gap-3 cursor-pointer group relative hover:-translate-y-1 hover:shadow-xl hover:bg-white/80 dark:hover:bg-black/80 transition-all";
-                    card.innerHTML = `
-                        ${getIcon(app.url, "w-6 h-6", "text-xs")}
-                        <span class="font-medium text-sm flex-1 truncate">${app.name}</span>
-                        <button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>
-                    `;
+                    card.innerHTML = `${getIcon(app.url, "w-6 h-6", "text-xs")}<span class="font-medium text-sm flex-1 truncate">${app.name}</span><button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold delete-btn" data-index="${index}">✕</button>`;
                 }
-                
                 grid.appendChild(card);
             });
 
-            // 绑定删除
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    apps.splice(parseInt(btn.getAttribute('data-index')), 1);
-                    saveApps();
-                }
+                btn.onclick = (e) => { e.stopPropagation(); apps.splice(parseInt(btn.getAttribute('data-index')), 1); saveApps(); }
             });
             
-            // 更新布局按钮高亮
             document.querySelectorAll('.layout-btn').forEach(b => {
-                if(b.dataset.layout === currentLayout) {
-                    b.classList.add('bg-primary', 'text-white', 'border-primary');
-                    b.classList.remove('bg-black/10', 'dark:bg-white/10', 'border-transparent');
-                } else {
-                    b.classList.remove('bg-primary', 'text-white', 'border-primary');
-                    b.classList.add('bg-black/10', 'dark:bg-white/10', 'border-transparent');
-                }
+                if(b.dataset.layout === currentLayout) { b.classList.add('bg-primary', 'text-white'); b.classList.remove('bg-black/10'); }
+                else { b.classList.remove('bg-primary', 'text-white'); b.classList.add('bg-black/10'); }
             });
         }
 
-        function saveApps() {
-            storage.set('myApps', JSON.stringify(apps));
-            renderApps();
-        }
+        function saveApps() { storage.set('myApps', JSON.stringify(apps)); renderApps(); }
 
-        // ==========================================
-        // 7. 弹窗与手风琴菜单逻辑
-        // ==========================================
         function renderAccordionPresets() {
             const container = $('accordion-container');
             container.innerHTML = '';
-            
             presetCategories.forEach((cat, idx) => {
                 const wrapper = document.createElement('div');
                 wrapper.className = "mb-2";
-                
-                const unaddedSites = cat.sites.filter(site => !apps.some(a => a.url.includes(getDomain(site.url))));
-
                 wrapper.innerHTML = `
-                    <button class="w-full flex items-center justify-between p-3 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/5 transition" data-target="cat-${idx}">
-                        <span class="font-semibold text-sm">${cat.category} <span class="text-xs opacity-50 font-normal ml-1">(${unaddedSites.length})</span></span>
+                    <button class="w-full flex items-center justify-between p-3 rounded-xl glass hover:bg-black/5 transition" data-target="cat-${idx}">
+                        <span class="font-semibold text-sm">${cat.category}</span>
                         <svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="cat-${idx}" class="accordion-content px-1">
                         <div class="flex flex-wrap gap-2 pt-3 pb-1">
                             ${cat.sites.map(site => {
                                 const isAdded = apps.some(a => a.url.includes(getDomain(site.url)));
-                                return `<button 
-                                    class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-500 bg-transparent' : `${cat.color} hover:scale-105 cursor-pointer shadow-sm`}"
-                                    ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.name}', '${site.url}')"`}
-                                >${site.name}</button>`;
+                                return `<button class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-500 bg-transparent' : `${cat.color} hover:scale-105 cursor-pointer shadow-sm`}" ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.name}', '${site.url}')"`}>${site.name}</button>`;
                             }).join('')}
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(wrapper);
             });
-
-            // 绑定手风琴折叠事件
             container.querySelectorAll('button[data-target]').forEach(btn => {
                 btn.onclick = () => {
                     const target = document.getElementById(btn.dataset.target);
                     const icon = btn.querySelector('svg');
-                    if(target.classList.contains('open')){
-                        target.classList.remove('open');
-                        icon.style.transform = 'rotate(0deg)';
-                    } else {
+                    if(target.classList.contains('open')){ target.classList.remove('open'); icon.style.transform = 'rotate(0deg)'; }
+                    else {
                         container.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
                         container.querySelectorAll('button[data-target] svg').forEach(el => el.style.transform = 'rotate(0deg)');
-                        target.classList.add('open');
-                        icon.style.transform = 'rotate(180deg)';
+                        target.classList.add('open'); icon.style.transform = 'rotate(180deg)';
                     }
                 };
             });
         }
 
-        // 全局添加函数（带反馈动画）
-        window.addPresetSite = function(btnElement, name, url) {
-            apps.push({ name, url });
-            saveApps();
-            
-            btnElement.classList.add('animate-pop');
-            btnElement.style.opacity = '0.4';
-            btnElement.style.pointerEvents = 'none';
-            btnElement.innerHTML = '✔ Added';
-            
+        window.addPresetSite = function(btn, name, url) {
+            apps.push({ name, url }); saveApps();
+            btn.classList.add('animate-pop'); btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; btn.innerHTML = '✔ Added';
             setTimeout(() => { renderAccordionPresets(); }, 1000);
         };
 
-        // 打开添加窗口
         $('add-app-btn').onclick = () => {
-            renderAccordionPresets();
-            $('app-name').value = ''; 
-            $('app-url').value = '';
+            renderAccordionPresets(); $('app-name').value = ''; $('app-url').value = '';
             $('modal').classList.replace('hidden', 'flex');
             setTimeout(() => { document.querySelector('.accordion-content')?.classList.add('open'); }, 50);
         };
-
-        // 关闭添加窗口
         $('modal-close-x').onclick = () => $('modal').classList.replace('flex', 'hidden');
-        
-        // 保存自定义链接
         $('modal-save').onclick = () => {
-            const name = $('app-name').value.trim();
-            let url = $('app-url').value.trim();
+            const name = $('app-name').value.trim(); let url = $('app-url').value.trim();
             if (!name || !url) return alert('Please fill both fields');
             if (!url.startsWith('http')) url = 'https://' + url;
-            apps.push({ name, url });
-            saveApps();
-            $('modal-close-x').click();
+            apps.push({ name, url }); saveApps(); $('modal-close-x').click();
         };
 
-        // ==========================================
-        // 8. 设置面板事件
-        // ==========================================
         $('settings-btn').onclick = () => $('settings-panel').classList.toggle('hidden');
-
-        // 点击页面其他地方关闭设置
-        document.addEventListener('click', function(event) {
-            const panel = $('settings-panel');
-            const btn = $('settings-btn');
-            if (!panel.classList.contains('hidden') && !panel.contains(event.target) && !btn.contains(event.target)) {
-                panel.classList.add('hidden');
-            }
+        document.addEventListener('click', e => {
+            const panel = $('settings-panel'), btn = $('settings-btn');
+            if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) panel.classList.add('hidden');
         });
 
-        // 布局切换
         document.querySelectorAll('.layout-btn').forEach(btn => {
-            btn.onclick = () => {
-                currentLayout = btn.dataset.layout;
-                storage.set('layout', currentLayout);
-                renderApps();
-            };
+            btn.onclick = () => { currentLayout = btn.dataset.layout; storage.set('layout', currentLayout); renderApps(); };
         });
 
-        // 主题切换
-        $('toggle-theme').onclick = () => {
-            document.documentElement.classList.toggle('dark');
-            storage.set('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        };
+        $('toggle-theme').onclick = () => { document.documentElement.classList.toggle('dark'); storage.set('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); };
         if (storage.get('theme') === 'light') document.documentElement.classList.remove('dark');
+        
+        $('toggle-lang').onclick = () => { currentLang = currentLang === 'en' ? 'zh' : 'en'; storage.set('lang', currentLang); applyLang(); };
+        function setBgPreset(g) { storage.set('bgColor', g); storage.remove('bgImg'); applyBackground(); }
+        $('bg-upload').addEventListener('change', e => {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader(); reader.onload = ev => { try { localStorage.setItem('bgImg', ev.target.result); } catch(err) { alert('Image too large'); } applyBackground(); }; reader.readAsDataURL(file);
+        });
+        function applyBackground() {
+            let img = null; try { img = localStorage.getItem('bgImg'); } catch(e){}
+            const color = storage.get('bgColor');
+            if (img) { document.body.style.background = `url('${img}') center/cover fixed`; }
+            else { document.body.style.background = color || 'linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)'; }
+        }
 
-        // 语言切换
-        $('toggle-lang').onclick = () => {
-            currentLang = currentLang === 'en' ? 'zh
+        $('reset-btn').onclick = () => { if(confirm(i18n[currentLang].resetConfirm)) { storage.clear(); location.reload(); } };
+
+        // 初始化搜索下拉
+        engines.forEach(eng => {
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left px-3 py-2 hover:bg-black/10 flex items-center gap-2 text-xs md:text-sm";
+            btn.innerHTML = `<span>${eng.icon}</span> ${eng.name}`;
+            btn.onclick = () => { currentEngine = eng; $('current-engine-icon').textContent = eng.icon; $('engine-dropdown').classList.add('opacity-0', 'invisible'); };
+            $('engine-dropdown').appendChild(btn);
+        });
+        $('current-engine-icon').textContent = currentEngine.icon;
+
+        function doSearch() { const kw = $('search-input').value.trim(); if (kw) window.open(currentEngine.url + encodeURIComponent(kw), '_blank'); }
+        $('search-btn').onclick = doSearch;
+        $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
+
+        // 启动
+        applyLang(); applyBackground(); renderApps();
+    </script>
+</body>
+</html>
