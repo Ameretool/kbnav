@@ -43,36 +43,62 @@ setInterval(updateClock, 1000); updateClock();
 
 function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
 
-function getIcon(url, size="w-8 h-8", textSize="text-xs") {
+// 重写图标获取，去掉边框，直接把尺寸放大
+function getIcon(url, size="w-12 h-12 md:w-16 md:h-16", textSize="text-xl") {
     const domain = getDomain(url);
     const img1 = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
     const letter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
-    return `<div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center border border-gray-200 dark:border-[#30363d]"><img src="${img1}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${letter}</span>';"></div>`;
+    // 移除了 border，图标如果是透明底直接透出背景
+    return `<div class="${size} icon-box flex-shrink-0 flex items-center justify-center">
+                <img src="${img1}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-500 ${textSize}\\'>${letter}</span>';">
+            </div>`;
 }
 
 function renderApps() {
     const grid = $('app-grid');
-    grid.className = currentLayout === 'grid' ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6" : currentLayout === 'banner' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
+    grid.className = currentLayout === 'grid' ? "grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4 md:gap-6" : 
+                   currentLayout === 'banner' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : 
+                   "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3";
     grid.innerHTML = '';
+    
     apps.forEach((app, index) => {
         const card = document.createElement('div');
         card.onclick = () => window.open(app.url, '_blank');
-        const cardBg = "bg-white dark:bg-[#161b22] border border-gray-200 dark:border-[#30363d] rounded-xl hover:bg-gray-50 dark:hover:bg-[#21262d] transition-all";
+        
+        // 🌟 核心修改：无边框，背景透明，悬浮时才显示毛玻璃底色
+        const hoverEffect = "hover:bg-gray-200/50 dark:hover:bg-[#21262d]/80";
+        
         if (currentLayout === 'grid') {
-            card.className = `flex flex-col items-center justify-center gap-2 cursor-pointer group relative p-3 ${cardBg}`;
-            card.innerHTML = `${getIcon(app.url, "w-12 h-12 md:w-14 md:h-14", "text-lg")}<span class="text-xs font-medium text-center w-full truncate text-gray-700 dark:text-gray-300">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-1 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
+            // 图二风格的 Grid：纯图标 + 小字，无框
+            card.className = `flex flex-col items-center justify-center gap-2 cursor-pointer group relative p-2 rounded-2xl transition-all duration-300 ${hoverEffect}`;
+            card.innerHTML = `
+                ${getIcon(app.url)}
+                <span class="text-[12px] md:text-[13px] font-medium text-gray-600 dark:text-gray-400 text-center w-full truncate">${app.name}</span>
+                <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
         } else if (currentLayout === 'banner') {
-            card.className = `flex items-center gap-3 cursor-pointer group relative p-3 ${cardBg}`;
-            card.innerHTML = `${getIcon(app.url, "w-8 h-8", "text-sm")}<span class="font-medium text-sm truncate flex-1 text-gray-700 dark:text-gray-300">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
+            // Banner：水平排列
+            card.className = `flex items-center gap-3 cursor-pointer group relative p-3 rounded-xl transition-all duration-300 ${hoverEffect}`;
+            card.innerHTML = `
+                ${getIcon(app.url, "w-10 h-10", "text-base")}
+                <span class="font-medium text-sm truncate flex-1 text-gray-700 dark:text-gray-300">${app.name}</span>
+                <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
         } else {
-            card.className = `flex items-center gap-3 cursor-pointer group relative px-4 py-2 ${cardBg} rounded-full`;
-            card.innerHTML = `${getIcon(app.url, "w-6 h-6", "text-xs")}<span class="font-medium text-sm flex-1 truncate text-gray-700 dark:text-gray-300">${app.name}</span><button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>`;
+            // Pill：胶囊
+            card.className = `flex items-center gap-3 cursor-pointer group relative px-4 py-2 rounded-full transition-all duration-300 ${hoverEffect}`;
+            card.innerHTML = `
+                ${getIcon(app.url, "w-8 h-8", "text-sm")}
+                <span class="font-medium text-sm flex-1 truncate text-gray-700 dark:text-gray-300">${app.name}</span>
+                <button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>`;
         }
         grid.appendChild(card);
     });
+    
+    // 删除按钮绑定
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.onclick = (e) => { e.stopPropagation(); apps.splice(parseInt(btn.getAttribute('data-index')), 1); saveApps(); }
     });
+    
+    // 布局按钮高亮
     document.querySelectorAll('.layout-btn').forEach(b => {
         if(b.dataset.layout === currentLayout) { b.classList.add('bg-[#2ea043]', 'text-white'); b.classList.remove('bg-gray-100', 'dark:bg-[#21262d]'); }
         else { b.classList.remove('bg-[#2ea043]', 'text-white'); b.classList.add('bg-gray-100', 'dark:bg-[#21262d]'); }
@@ -80,6 +106,7 @@ function renderApps() {
 }
 function saveApps() { storage.set('myApps', JSON.stringify(apps)); renderApps(); }
 
+// 折叠面板渲染 (保持不变)
 function renderAccordionPresets() {
     const container = $('accordion-container');
     container.innerHTML = '';
@@ -169,7 +196,7 @@ if (storage.get('theme') === 'light') document.documentElement.classList.remove(
 function applyBackground() {
     let img = null; try { img = localStorage.getItem('bgImg'); } catch(e){}
     if (img) { document.body.style.background = `url('${img}') center/cover fixed`; }
-    else { document.body.style.background = ''; } 
+    else { document.body.style.background = ''; }
 }
 $('bg-upload').addEventListener('change', e => {
     const file = e.target.files[0]; if(!file) return;
