@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="zh-CN" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,157 +12,113 @@
         }
     </script>
     <style>
-        /* 沉浸式背景 */
         body {
             background-size: cover; background-position: center; background-attachment: fixed;
             transition: background 0.5s ease; -webkit-tap-highlight-color: transparent;
             position: relative; background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);
         }
-        /* 🌟 修复1：暗色/亮色遮罩调整，去掉了“泛白”感 */
+        /* 强制调暗/调亮遮罩，保证文字在任何背景下都清晰 */
         body::before {
-            content: ''; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: -1;
+            content: ''; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: -1; transition: background 0.5s;
         }
-        html:not(.dark) body::before { background: rgba(0, 0, 0, 0.15); } /* 浅色模式下不再用白色遮罩，而是轻微加深 */
-
-        /* 玻璃拟物化 */
-        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.4); }
-        .dark .glass { background: rgba(25,25,30,0.7); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); }
+        html:not(.dark) body::before { background: rgba(255, 255, 255, 0.5); }
+        
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.4); }
+        .dark .glass { background: rgba(25,25,30,0.75); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); }
         
         ::-webkit-scrollbar { width: 0px; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 图标白底，防止黑夜模式看不清 */
         .icon-box { position: relative; overflow: hidden; background: #fff; }
         .icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2px; }
-
-        /* 🌟 修复3：折叠面板动画 (完全复刻图五的彩色风格) */
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .accordion-content.open { max-height: 800px; transition: max-height 0.3s ease-in; }
-        .animate-pop { animation: pop 0.3s ease; }
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         
-        /* 🌟 修复2：下拉菜单样式 */
         .dropdown-menu {
-            background: rgba(30, 30, 35, 0.95); /* 强制深色背景 */
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(30, 30, 35, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
         }
         html:not(.dark) .dropdown-menu {
-            background: rgba(255, 255, 255, 0.95); /* 强制浅色背景 */
-            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(0,0,0,0.1);
         }
     </style>
 </head>
-<body class="min-h-screen text-gray-900 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-20 px-3 md:px-8">
+<body class="min-h-screen text-gray-900 dark:text-gray-100 flex flex-col items-center pt-10 pb-20 px-3 md:px-8">
 
-    <!-- 顶部标题 -->
     <div class="text-center mb-8 flex flex-col items-center justify-center gap-1 w-full max-w-4xl">
         <h1 class="text-3xl md:text-5xl font-bold tracking-wider drop-shadow-md">Search Hub</h1>
         <div class="text-xl md:text-3xl font-light opacity-90 mt-1"><span id="clock">00:00</span></div>
-        <p class="text-xs md:text-sm opacity-70" id="date-text">Loading...</p>
+        <p class="text-xs md:text-sm opacity-70" id="date-text">加载中...</p>
     </div>
 
-    <!-- 搜索框 -->
     <div class="w-full max-w-2xl glass rounded-full flex items-center shadow-2xl relative z-20 p-1.5 md:p-2">
         <div class="relative group shrink-0">
-            <button id="engine-btn" class="flex items-center gap-1 px-3 py-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition cursor-pointer">
+            <button class="flex items-center gap-1 px-3 py-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition cursor-pointer">
                 <span id="current-engine-icon" class="text-lg">🌐</span>
                 <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <!-- 强化下拉菜单 -->
-            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-40 md:w-48 dropdown-menu rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
-            </div>
+            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-40 dropdown-menu rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden"></div>
         </div>
-        <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500 dark:placeholder-gray-400" placeholder="Enter search content...">
+        <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500 dark:placeholder-gray-400" placeholder="输入搜索内容...">
         <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-primary text-white rounded-full hover:bg-indigo-600 transition shadow-lg flex items-center justify-center">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </button>
     </div>
 
-    <!-- 应用列表 -->
     <div class="w-full max-w-5xl mt-10 z-10 px-1 md:px-0">
-        <h2 class="text-sm md:text-base font-semibold mb-4 opacity-90 flex items-center gap-2" id="app-title">My Apps</h2>
+        <h2 class="text-sm font-semibold mb-4 opacity-90">我的应用</h2>
         <div id="app-grid"></div>
         
         <div class="mt-8 flex justify-center">
              <button id="add-app-btn" class="glass rounded-xl px-6 py-2.5 flex items-center justify-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition border-dashed border-2 border-gray-400 dark:border-gray-500 cursor-pointer text-sm font-medium opacity-80 shadow-sm">
-                <span class="text-lg">+</span><span id="add-btn-text">Add New</span>
+                <span class="text-lg">+</span><span>添加新链接</span>
             </button>
         </div>
     </div>
 
-    <!-- 设置按钮 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
         <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
         
-        <!-- 设置面板 -->
         <div id="settings-panel" class="absolute bottom-14 right-0 w-72 glass rounded-2xl p-5 shadow-2xl hidden flex-col gap-5 border border-white/20 max-h-[80vh] overflow-y-auto hide-scrollbar">
             <div class="flex flex-col gap-2">
-                <span class="text-sm font-medium" id="set-layout">Layout Style</span>
+                <span class="text-sm font-medium">卡片布局</span>
                 <div class="grid grid-cols-3 gap-2">
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="grid">Grid</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="banner">Banner</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="pill">Pill</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition" data-layout="grid">Grid</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition" data-layout="banner">Banner</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition" data-layout="pill">Pill</button>
                 </div>
             </div>
-
             <div class="flex justify-between items-center border-t border-gray-400/30 pt-4">
-                <span class="text-sm font-medium" id="set-lang">Language</span>
-                <button id="toggle-lang" class="px-2 py-1 bg-black/10 dark:bg-white/10 rounded text-xs hover:bg-black/20 transition">EN / 中</button>
+                <span class="text-sm font-medium">主题外观</span>
+                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-primary relative transition-colors"><div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div></button>
             </div>
-            <div class="flex justify-between items-center">
-                <span class="text-sm font-medium" id="set-theme">Dark Mode</span>
-                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-primary relative transition-colors">
-                    <div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div>
-                </button>
-            </div>
-            
             <div class="flex flex-col gap-2 border-t border-gray-400/30 pt-4">
-                <span class="text-sm font-medium" id="set-bg">Background</span>
+                <span class="text-sm font-medium">背景设置</span>
                 <div class="flex justify-between gap-2 px-1 my-1">
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);" onclick="setBgPreset('linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')"></button>
                 </div>
-                <div class="flex gap-2 mt-1">
-                    <label class="w-full text-center cursor-pointer bg-black/10 dark:bg-white/10 rounded-md py-1.5 text-xs hover:bg-black/20 transition">
-                        <span id="bg-upload-text">Upload Custom Img</span>
-                        <input type="file" id="bg-upload" class="hidden" accept="image/*">
-                    </label>
-                </div>
+                <label class="w-full text-center cursor-pointer bg-black/10 dark:bg-white/10 rounded-md py-1.5 text-xs hover:bg-black/20 transition">
+                    上传自定义图片<input type="file" id="bg-upload" class="hidden" accept="image/*">
+                </label>
             </div>
-
             <div class="border-t border-gray-400/30 pt-4">
-                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20">
-                    Reset All Data
-                </button>
+                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20">清空数据恢复默认</button>
             </div>
         </div>
     </div>
 
-    <!-- 🌟 重做：彩色折叠面板模态框 -->
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
-        <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] md:max-h-[80vh]">
+        <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
-                <h3 class="text-lg font-bold" id="modal-title">Add New App</h3>
+                <h3 class="text-lg font-bold">添加新链接</h3>
                 <button id="modal-close-x" class="p-2 opacity-50 hover:opacity-100">✕</button>
             </div>
-            
-            <!-- 折叠区域 -->
-            <div class="flex-1 overflow-y-auto hide-scrollbar mb-4 pr-1 border-b border-gray-400/20 pb-4" id="accordion-container">
-                <!-- 动态渲染 -->
-            </div>
-
             <div class="flex flex-col gap-3 shrink-0 pt-2">
-                <input type="text" id="app-name" placeholder="Name (Custom)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
-                <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
-                <div class="flex justify-end gap-3 mt-2">
-                    <button id="modal-save" class="w-full py-2.5 bg-primary text-white rounded-xl hover:bg-indigo-600 text-sm font-medium shadow-lg transition">Save Custom Link</button>
-                </div>
+                <input type="text" id="app-name" placeholder="名称 (例如：GitHub)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary">
+                <input type="url" id="app-url" placeholder="网址 (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary">
+                <button id="modal-save" class="w-full py-2.5 bg-primary text-white rounded-xl hover:bg-indigo-600 text-sm font-medium shadow-lg mt-2">保存链接</button>
             </div>
         </div>
     </div>
@@ -183,89 +139,35 @@
             }
         };
 
-        const i18n = {
-            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", save: "Save Custom Link", resetConfirm: "Are you sure you want to clear all data?" },
-            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", save: "保存自定义链接", resetConfirm: "确定要清空所有数据吗？" }
-        };
-        let currentLang = storage.get('lang') || 'zh'; // 默认中文
-
         const engines = [
             { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
             { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
-            { id: 'baidu', name: 'Baidu 百度', url: 'https://www.baidu.com/s?wd=', icon: '🐾' },
-            { id: 'ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: '🦆' }
+            { id: 'baidu', name: 'Baidu', url: 'https://www.baidu.com/s?wd=', icon: '🐾' }
         ];
         let currentEngine = engines[0];
         const $ = id => document.getElementById(id);
 
-        // 🌟 彩色分类配置 (左侧边框颜色，文字颜色，标签背景)
-        const presetCategories = [
-            { 
-                category: "AI Tools", 
-                barColor: "border-l-purple-500", 
-                btnColor: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-500/30",
-                sites: [ { name: 'ChatGPT', url: 'https://chatgpt.com' }, { name: 'Claude', url: 'https://claude.ai' }, { name: 'Gemini', url: 'https://gemini.google.com' }, { name: 'Midjourney', url: 'https://midjourney.com' } ] 
-            },
-            { 
-                category: "Developer", 
-                barColor: "border-l-blue-500", 
-                btnColor: "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30",
-                sites: [ { name: 'GitHub', url: 'https://github.com' }, { name: 'Cloudflare', url: 'https://dash.cloudflare.com' }, { name: 'Vercel', url: 'https://vercel.com' }, { name: 'StackOverflow', url: 'https://stackoverflow.com' } ] 
-            },
-            { 
-                category: "Media & Social", 
-                barColor: "border-l-pink-500", 
-                btnColor: "bg-pink-500/20 text-pink-700 dark:text-pink-300 border-pink-500/30",
-                sites: [ { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' }, { name: 'Netflix', url: 'https://netflix.com' }, { name: 'Twitter/X', url: 'https://x.com' } ] 
-            },
-            { 
-                category: "China Local", 
-                barColor: "border-l-green-500", 
-                btnColor: "bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30",
-                sites: [ { name: '知乎', url: 'https://zhihu.com' }, { name: '微博', url: 'https://weibo.com' }, { name: '小红书', url: 'https://xiaohongshu.com' }, { name: '淘宝', url: 'https://taobao.com' } ] 
-            }
-        ];
-
-        let currentLayout = storage.get('layout') || 'grid'; // 默认宫格
-        const defaultApps = [ { name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' }, { name: 'ChatGPT', url: 'https://chatgpt.com' } ];
-        
+        let currentLayout = storage.get('layout') || 'grid'; 
+        const defaultApps = [ { name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' } ];
         let apps = defaultApps;
         try { const s = storage.get('myApps'); if(s) apps = JSON.parse(s); } catch(e) {}
 
         function updateClock() {
             const now = new Date();
             $('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-            $('date-text').textContent = now.toLocaleDateString(currentLang === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            $('date-text').textContent = now.toLocaleDateString('zh-CN', { weekday: 'short', month: 'short', day: 'numeric' });
         }
         setInterval(updateClock, 1000);
         updateClock();
-
-        function applyLang() {
-            const d = i18n[currentLang];
-            $('search-input').placeholder = d.placeholder;
-            $('app-title').textContent = d.appTitle;
-            $('add-btn-text').textContent = d.addBtn;
-            $('set-layout').textContent = d.setLayout;
-            $('set-lang').textContent = d.setLang;
-            $('set-theme').textContent = d.setTheme;
-            $('set-bg').textContent = d.setBg;
-            $('bg-upload-text').textContent = d.bgUpload;
-            $('reset-btn').textContent = d.resetBtn;
-            $('modal-title').textContent = d.modalTitle;
-            $('modal-save').textContent = d.save;
-        }
 
         function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
         
         function getIcon(url, size="w-8 h-8", textSize="text-xs") {
             const domain = getDomain(url);
             const img1 = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-            const img2 = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-            const img3 = `https://icon.horse/icon/${domain}`;
             const letter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
-            return `
-                <div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm border border-black/5 dark:border-white/10">
-                    <img src="${img1}" onerror="this.onerror=function(){this.src='${img2}'; this.onerror=function(){this.src='${img3}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${letter}</span>';}};};">
+            return `<div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm border border-black/5 dark:border-white/10">
+                    <img src="${img1}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${letter}</span>';">
                 </div>`;
         }
 
@@ -279,8 +181,6 @@
             apps.forEach((app, index) => {
                 const card = document.createElement('div');
                 card.onclick = () => window.open(app.url, '_blank');
-                card.title = app.name;
-
                 if (currentLayout === 'grid') {
                     card.className = "flex flex-col items-center justify-center gap-2 cursor-pointer group relative p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl transition";
                     card.innerHTML = `${getIcon(app.url, "w-12 h-12 md:w-14 md:h-14", "text-lg")}<span class="text-xs font-medium text-center w-full truncate opacity-90">${app.name}</span><button class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 p-1 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
@@ -299,79 +199,22 @@
             });
             
             document.querySelectorAll('.layout-btn').forEach(b => {
-                if(b.dataset.layout === currentLayout) { b.classList.add('bg-primary', 'text-white', 'border-primary'); b.classList.remove('bg-black/10', 'dark:bg-white/10', 'border-transparent'); }
-                else { b.classList.remove('bg-primary', 'text-white', 'border-primary'); b.classList.add('bg-black/10', 'dark:bg-white/10', 'border-transparent'); }
+                if(b.dataset.layout === currentLayout) { b.classList.add('bg-primary', 'text-white'); b.classList.remove('bg-black/10', 'dark:bg-white/10'); }
+                else { b.classList.remove('bg-primary', 'text-white'); b.classList.add('bg-black/10', 'dark:bg-white/10'); }
             });
         }
 
         function saveApps() { storage.set('myApps', JSON.stringify(apps)); renderApps(); }
 
-        // 🌟 渲染彩色手风琴菜单（完全照着图五复刻）
-        function renderAccordionPresets() {
-            const container = $('accordion-container');
-            container.innerHTML = '';
-            
-            presetCategories.forEach((cat, idx) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = "mb-3";
-                
-                // 计算未添加的数量
-                const unaddedSites = cat.sites.filter(site => !apps.some(a => a.url.includes(getDomain(site.url))));
-
-                wrapper.innerHTML = `
-                    <button class="w-full flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-black/30 border-l-4 ${cat.barColor} shadow-sm hover:bg-white/80 dark:hover:bg-black/50 transition-all" data-target="cat-${idx}">
-                        <span class="font-bold text-sm tracking-wide text-gray-800 dark:text-gray-200">${cat.category}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs opacity-50 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full">${unaddedSites.length}</span>
-                            <svg class="w-4 h-4 transform transition-transform opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                    </button>
-                    <div id="cat-${idx}" class="accordion-content px-2">
-                        <div class="flex flex-wrap gap-2 pt-3 pb-2">
-                            ${cat.sites.map(site => {
-                                const isAdded = apps.some(a => a.url.includes(getDomain(site.url)));
-                                return `<button 
-                                    class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-500 bg-transparent' : `${cat.btnColor} hover:scale-105 cursor-pointer shadow-sm`}"
-                                    ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.name}', '${site.url}')"`}
-                                >${site.name}</button>`;
-                            }).join('')}
-                        </div>
-                    </div>`;
-                container.appendChild(wrapper);
-            });
-
-            container.querySelectorAll('button[data-target]').forEach(btn => {
-                btn.onclick = () => {
-                    const target = document.getElementById(btn.dataset.target);
-                    const icon = btn.querySelector('svg');
-                    if(target.classList.contains('open')){
-                        target.classList.remove('open');
-                        icon.style.transform = 'rotate(0deg)';
-                    } else {
-                        container.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
-                        container.querySelectorAll('button[data-target] svg').forEach(el => el.style.transform = 'rotate(0deg)');
-                        target.classList.add('open');
-                        icon.style.transform = 'rotate(180deg)';
-                    }
-                };
-            });
-        }
-
-        window.addPresetSite = function(btn, name, url) {
-            apps.push({ name, url }); saveApps();
-            btn.classList.add('animate-pop'); btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; btn.innerHTML = '✔ Added';
-            setTimeout(() => { renderAccordionPresets(); }, 1000);
-        };
-
+        // 绑定事件
         $('add-app-btn').onclick = () => {
-            renderAccordionPresets(); $('app-name').value = ''; $('app-url').value = '';
+            $('app-name').value = ''; $('app-url').value = '';
             $('modal').classList.replace('hidden', 'flex');
-            setTimeout(() => { document.querySelector('.accordion-content')?.classList.add('open'); }, 50);
         };
         $('modal-close-x').onclick = () => $('modal').classList.replace('flex', 'hidden');
         $('modal-save').onclick = () => {
             const name = $('app-name').value.trim(); let url = $('app-url').value.trim();
-            if (!name || !url) return alert('Please fill both fields');
+            if (!name || !url) return alert('请填写完整信息');
             if (!url.startsWith('http')) url = 'https://' + url;
             apps.push({ name, url }); saveApps(); $('modal-close-x').click();
         };
@@ -389,13 +232,10 @@
         $('toggle-theme').onclick = () => { document.documentElement.classList.toggle('dark'); storage.set('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); };
         if (storage.get('theme') === 'light') document.documentElement.classList.remove('dark');
         
-        $('toggle-lang').onclick = () => { currentLang = currentLang === 'zh' ? 'en' : 'zh'; storage.set('lang', currentLang); applyLang(); };
-        
         function setBgPreset(g) { storage.set('bgColor', g); storage.remove('bgImg'); applyBackground(); }
-        
         $('bg-upload').addEventListener('change', e => {
             const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader(); reader.onload = ev => { try { localStorage.setItem('bgImg', ev.target.result); } catch(err) { alert('Image too large'); } applyBackground(); }; reader.readAsDataURL(file);
+            const reader = new FileReader(); reader.onload = ev => { try { localStorage.setItem('bgImg', ev.target.result); } catch(err) { alert('图片太大'); } applyBackground(); }; reader.readAsDataURL(file);
         });
         
         function applyBackground() {
@@ -405,8 +245,23 @@
             else { document.body.style.background = color || 'linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)'; }
         }
 
-        $('reset-btn').onclick = () => { if(confirm(i18n[currentLang].resetConfirm)) { storage.clear(); location.reload(); } };
+        $('reset-btn').onclick = () => { if(confirm('确定清空所有数据吗？')) { storage.clear(); location.reload(); } };
 
+        // 初始化引擎
         engines.forEach(eng => {
             const btn = document.createElement('button');
-            btn.className = "w-full text-left px-4 py-3 hover:bg-black/10 dark:hover:bg-white/10 flex items-center
+            btn.className = "w-full text-left px-4 py-3 hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2 text-sm";
+            btn.innerHTML = `<span>${eng.icon}</span> ${eng.name}`;
+            btn.onclick = () => { currentEngine = eng; $('current-engine-icon').textContent = eng.icon; };
+            $('engine-dropdown').appendChild(btn);
+        });
+        
+        function doSearch() { const kw = $('search-input').value.trim(); if (kw) window.open(currentEngine.url + encodeURIComponent(kw), '_blank'); }
+        $('search-btn').onclick = doSearch;
+        $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
+
+        // 启动
+        applyBackground(); renderApps();
+    </script>
+</body>
+</html>
