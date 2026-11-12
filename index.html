@@ -16,7 +16,7 @@
         }
     </script>
     <style>
-        /* 保证背景图铺满且不晃动 */
+        /* 沉浸式背景 */
         body {
             background-size: cover;
             background-position: center;
@@ -24,22 +24,24 @@
             transition: background 0.5s ease, background-image 0.5s ease;
             -webkit-tap-highlight-color: transparent;
             position: relative;
+            /* 默认给一个好看的深色渐变，防止刚加载时全白 */
+            background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);
         }
-        /* 自动遮罩层，强制压暗背景，保证文字永远清晰 */
+        
+        /* 核心遮罩：强制保证文字在亮色/暗色背景下都能看清 */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.35); /* 默认稍微深一点 */
+            background: rgba(0, 0, 0, 0.25); 
             z-index: -1;
             transition: background 0.5s;
         }
-        /* 浅色模式下稍微提亮遮罩，但不至于全白 */
         html:not(.dark) body::before {
             background: rgba(255, 255, 255, 0.15);
         }
 
-        /* 毛玻璃拟态 */
+        /* 毛玻璃 */
         .glass {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
@@ -56,13 +58,12 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 图标底板 */
+        /* 图标底板：强制白底，防止黑色图标在夜间模式下看不清 */
         .icon-box { 
             position: relative; 
             overflow: hidden; 
-            background: rgba(255, 255, 255, 0.9); /* 强制白色底板，防黑图看不清 */
+            background: rgba(255, 255, 255, 0.9);
         }
-        .dark .icon-box { background: rgba(255, 255, 255, 0.85); }
         .icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2px; }
 
         /* 手风琴动画 */
@@ -72,18 +73,17 @@
             transition: max-height 0.3s ease-out;
         }
         .accordion-content.open {
-            max-height: 600px;
+            max-height: 800px;
             transition: max-height 0.3s ease-in;
         }
         
-        /* 添加成功的弹跳动画 */
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .animate-pop { animation: pop 0.3s ease; }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-20 px-3 md:px-8">
 
-    <!-- 顶部时间与标题 -->
+    <!-- 顶部标题 -->
     <div class="text-center mb-8 md:mb-12 flex flex-col items-center justify-center gap-1 md:gap-3 w-full max-w-4xl">
         <h1 class="text-3xl md:text-5xl font-bold tracking-wider drop-shadow-md">Search Hub</h1>
         <div class="flex items-center justify-center gap-4 text-xl md:text-3xl font-light opacity-90 mt-1 md:mt-2">
@@ -92,7 +92,7 @@
         <p class="text-xs md:text-sm opacity-70" id="date-text">Loading...</p>
     </div>
 
-    <!-- 搜索框 -->
+    <!-- 搜索区域 -->
     <div class="w-full max-w-2xl glass rounded-full flex items-center shadow-2xl relative z-10 p-1.5 md:p-2">
         <div class="relative group shrink-0">
             <button id="engine-btn" class="flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition cursor-pointer">
@@ -123,7 +123,7 @@
         </div>
     </div>
 
-    <!-- 右下角设置 -->
+    <!-- 右下角设置按钮 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
         <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -175,7 +175,7 @@
         </div>
     </div>
 
-    <!-- 折叠彩色菜单模态框 -->
+    <!-- 添加链接模态框 -->
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
         <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] md:max-h-[80vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
@@ -198,7 +198,9 @@
     </div>
 
     <script>
-        // 双引擎存储
+        // ==========================================
+        // 1. 存储引擎 (双保险：Cookie + LocalStorage)
+        // ==========================================
         const storage = {
             set: function(key, value) {
                 try { localStorage.setItem(key, value); } catch(e) {}
@@ -225,12 +227,18 @@
             }
         };
 
+        // ==========================================
+        // 2. 多语言字典
+        // ==========================================
         const i18n = {
             en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", cancel: "Cancel", save: "Save Custom Link", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
             zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", cancel: "取消", save: "保存自定义链接", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
         };
         let currentLang = storage.get('lang') || 'en';
 
+        // ==========================================
+        // 3. 搜索引擎配置
+        // ==========================================
         const engines = [
             { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
             { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
@@ -241,6 +249,9 @@
         let currentEngine = engines[0];
         const $ = id => document.getElementById(id);
 
+        // ==========================================
+        // 4. 预设网站库 (分类)
+        // ==========================================
         const presetCategories = [
             {
                 category: "AI Tools",
@@ -288,7 +299,10 @@
             }
         ];
 
-        let currentLayout = storage.get('layout') || 'pill'; // 默认改成高级的胶囊模式
+        // ==========================================
+        // 5. 状态与初始化
+        // ==========================================
+        let currentLayout = storage.get('layout') || 'grid'; // 默认使用宫格
         const defaultApps = [
             { name: 'GitHub', url: 'https://github.com' },
             { name: 'YouTube', url: 'https://youtube.com' },
@@ -324,11 +338,14 @@
             $('modal-save').textContent = d.save;
         }
 
+        // ==========================================
+        // 6. 图标获取与渲染
+        // ==========================================
         function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
         
-        // 图标三级降级，且强制给白色底板
         function getIcon(url, size="w-8 h-8", textSize="text-xs") {
             const domain = getDomain(url);
+            // 三级容错方案
             const googleIcon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             const ddgIcon = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
             const horseIcon = `https://icon.horse/icon/${domain}`;
@@ -337,7 +354,7 @@
             return `
                 <div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
                     <img src="${googleIcon}" 
-                         onerror="this.onerror=function(){this.src='${ddgIcon}'; this.onerror=function(){this.src='${horseIcon}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold opacity-70 ${textSize}\\'>${firstLetter}</span>';}};};">
+                         onerror="this.onerror=function(){this.src='${ddgIcon}'; this.onerror=function(){this.src='${horseIcon}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-800 ${textSize}\\'>${firstLetter}</span>';}};};">
                 </div>
             `;
         }
@@ -347,13 +364,11 @@
             grid.className = ''; 
             grid.innerHTML = '';
             
-            // 布局配置
             if (currentLayout === 'grid') {
                 grid.className = "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6";
             } else if (currentLayout === 'banner') {
                 grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4";
             } else if (currentLayout === 'pill') {
-                // 胶囊布局：极简、高级
                 grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
             }
 
@@ -377,7 +392,6 @@
                         <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>
                     `;
                 } else if (currentLayout === 'pill') {
-                    // 重点：这就是图二那种高级卡片，半透明背景，悬浮有阴影
                     card.className = "glass rounded-full px-4 py-2 flex items-center gap-3 cursor-pointer group relative hover:-translate-y-1 hover:shadow-xl hover:bg-white/80 dark:hover:bg-black/80 transition-all";
                     card.innerHTML = `
                         ${getIcon(app.url, "w-6 h-6", "text-xs")}
@@ -389,6 +403,7 @@
                 grid.appendChild(card);
             });
 
+            // 绑定删除
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     e.stopPropagation();
@@ -397,6 +412,7 @@
                 }
             });
             
+            // 更新布局按钮高亮
             document.querySelectorAll('.layout-btn').forEach(b => {
                 if(b.dataset.layout === currentLayout) {
                     b.classList.add('bg-primary', 'text-white', 'border-primary');
@@ -413,7 +429,9 @@
             renderApps();
         }
 
-        // 渲染彩色手风琴菜单
+        // ==========================================
+        // 7. 弹窗与手风琴菜单逻辑
+        // ==========================================
         function renderAccordionPresets() {
             const container = $('accordion-container');
             container.innerHTML = '';
@@ -444,6 +462,7 @@
                 container.appendChild(wrapper);
             });
 
+            // 绑定手风琴折叠事件
             container.querySelectorAll('button[data-target]').forEach(btn => {
                 btn.onclick = () => {
                     const target = document.getElementById(btn.dataset.target);
@@ -461,21 +480,20 @@
             });
         }
 
-        // 🌟 点击后不仅加进去，还要给按钮加反馈
+        // 全局添加函数（带反馈动画）
         window.addPresetSite = function(btnElement, name, url) {
             apps.push({ name, url });
             saveApps();
             
-            // 按钮视觉反馈
             btnElement.classList.add('animate-pop');
             btnElement.style.opacity = '0.4';
             btnElement.style.pointerEvents = 'none';
             btnElement.innerHTML = '✔ Added';
             
-            // 延时恢复文字
             setTimeout(() => { renderAccordionPresets(); }, 1000);
         };
 
+        // 打开添加窗口
         $('add-app-btn').onclick = () => {
             renderAccordionPresets();
             $('app-name').value = ''; 
@@ -484,8 +502,10 @@
             setTimeout(() => { document.querySelector('.accordion-content')?.classList.add('open'); }, 50);
         };
 
+        // 关闭添加窗口
         $('modal-close-x').onclick = () => $('modal').classList.replace('flex', 'hidden');
         
+        // 保存自定义链接
         $('modal-save').onclick = () => {
             const name = $('app-name').value.trim();
             let url = $('app-url').value.trim();
@@ -496,9 +516,21 @@
             $('modal-close-x').click();
         };
 
-        // --- 设置面板事件 ---
+        // ==========================================
+        // 8. 设置面板事件
+        // ==========================================
         $('settings-btn').onclick = () => $('settings-panel').classList.toggle('hidden');
 
+        // 点击页面其他地方关闭设置
+        document.addEventListener('click', function(event) {
+            const panel = $('settings-panel');
+            const btn = $('settings-btn');
+            if (!panel.classList.contains('hidden') && !panel.contains(event.target) && !btn.contains(event.target)) {
+                panel.classList.add('hidden');
+            }
+        });
+
+        // 布局切换
         document.querySelectorAll('.layout-btn').forEach(btn => {
             btn.onclick = () => {
                 currentLayout = btn.dataset.layout;
@@ -507,23 +539,13 @@
             };
         });
 
+        // 主题切换
         $('toggle-theme').onclick = () => {
             document.documentElement.classList.toggle('dark');
             storage.set('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         };
         if (storage.get('theme') === 'light') document.documentElement.classList.remove('dark');
 
+        // 语言切换
         $('toggle-lang').onclick = () => {
-            currentLang = currentLang === 'en' ? 'zh' : 'en';
-            storage.set('lang', currentLang);
-            applyLang();
-        };
-
-        function setBgPreset(gradient) {
-            storage.set('bgColor', gradient);
-            storage.remove('bgImg');
-            applyBackground();
-        }
-
-        $('bg-upload').addEventListener('change', e => {
-            const file = e.target
+            currentLang = currentLang === 'en' ? 'zh
