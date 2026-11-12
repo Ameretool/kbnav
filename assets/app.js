@@ -1,4 +1,3 @@
-// 存储引擎
 const storage = {
     set: (k, v) => { try { localStorage.setItem(k, v); } catch(e){}; document.cookie = `${k}=${encodeURIComponent(v)}; max-age=31536000; path=/; SameSite=Lax`; },
     get: (k) => {
@@ -14,14 +13,13 @@ const storage = {
 };
 
 const engines = [
-    { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
-    { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
-    { id: 'baidu', name: 'Baidu', url: 'https://www.baidu.com/s?wd=', icon: '🐾' }
+    { name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
+    { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
+    { name: 'Baidu', url: 'https://www.baidu.com/s?wd=', icon: '🐾' }
 ];
 let currentEngine = engines[0];
 const $ = id => document.getElementById(id);
 
-// 10种颜色预设 + 背景色联动
 const presetCategories = [
     { cat: "AI 工具", bar: "border-l-blue-500", bg: "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)", sites: [{n:"ChatGPT",u:"https://chatgpt.com"},{n:"Claude",u:"https://claude.ai"},{n:"Gemini",u:"https://gemini.google.com"}] },
     { cat: "开发社区", bar: "border-l-green-500", bg: "linear-gradient(135deg, #1e3c2c 0%, #2d6a4f 100%)", sites: [{n:"GitHub",u:"https://github.com"},{n:"Cloudflare",u:"https://dash.cloudflare.com"},{n:"Vercel",u:"https://vercel.com"}] },
@@ -36,11 +34,9 @@ const presetCategories = [
 ];
 
 let currentLayout = storage.get('layout') || 'grid'; 
-const defaultApps = [ { name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' } ];
-let apps = defaultApps;
+let apps = [{ name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }, { name: 'Bilibili', url: 'https://bilibili.com' }];
 try { const s = storage.get('myApps'); if(s) apps = JSON.parse(s); } catch(e) {}
 
-// 时间与基础渲染 (与前文一致，省略重复，核心看下面)
 function updateClock() {
     const now = new Date();
     $('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -49,6 +45,7 @@ function updateClock() {
 setInterval(updateClock, 1000); updateClock();
 
 function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
+
 function getIcon(url, size="w-8 h-8", textSize="text-xs") {
     const domain = getDomain(url);
     const img1 = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -58,9 +55,7 @@ function getIcon(url, size="w-8 h-8", textSize="text-xs") {
 
 function renderApps() {
     const grid = $('app-grid');
-    grid.className = currentLayout === 'grid' ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6" :
-                   currentLayout === 'banner' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" :
-                   "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
+    grid.className = currentLayout === 'grid' ? "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6" : currentLayout === 'banner' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
     grid.innerHTML = '';
     
     apps.forEach((app, index) => {
@@ -83,15 +78,12 @@ function renderApps() {
         btn.onclick = (e) => { e.stopPropagation(); apps.splice(parseInt(btn.getAttribute('data-index')), 1); saveApps(); }
     });
     document.querySelectorAll('.layout-btn').forEach(b => {
-        if(b.dataset.layout === currentLayout) { b.classList.add('bg-primary', 'text-white'); b.classList.remove('bg-black/10', 'dark:bg-white/10'); }
-        else { b.classList.remove('bg-primary', 'text-white'); b.classList.add('bg-black/10', 'dark:bg-white/10'); }
+        if(b.dataset.layout === currentLayout) { b.classList.add('bg-primary', 'text-white'); b.classList.remove('bg-black/10'); }
+        else { b.classList.remove('bg-primary', 'text-white'); b.classList.add('bg-black/10'); }
     });
 }
 function saveApps() { storage.set('myApps', JSON.stringify(apps)); renderApps(); }
 
-// ==========================================
-// 🌟 A+B 核心逻辑：11 个彩色面板与自定义
-// ==========================================
 function renderAccordionPresets() {
     const container = $('accordion-container');
     container.innerHTML = '';
@@ -101,7 +93,6 @@ function renderAccordionPresets() {
         const wrapper = document.createElement('div');
         wrapper.className = "mb-2";
         const unadded = cat.sites.filter(site => !apps.some(a => a.url.includes(getDomain(site.u))));
-
         wrapper.innerHTML = `
             <button class="w-full flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-black/40 border-l-4 ${cat.bar} shadow-sm hover:bg-white/80 dark:hover:bg-black/60 transition-all" data-target="cat-${idx}" data-bg="${cat.bg}">
                 <span class="font-bold text-sm tracking-wide text-gray-800 dark:text-gray-200">${cat.cat}</span>
@@ -138,34 +129,32 @@ function renderAccordionPresets() {
         </div>`;
     container.appendChild(customWrapper);
 
-    // 3. 绑定所有折叠面板的事件
+    // 3. 绑定事件
     container.querySelectorAll('button[data-target]').forEach(btn => {
         btn.onclick = () => {
             const target = document.getElementById(btn.dataset.target);
             const icon = btn.querySelector('svg');
             if(target.classList.contains('open')){
-                target.classList.remove('open');
-                icon.style.transform = 'rotate(0deg)';
+                target.classList.remove('open'); icon.style.transform = 'rotate(0deg)';
             } else {
                 container.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
                 container.querySelectorAll('button[data-target] svg').forEach(el => el.style.transform = 'rotate(0deg)');
-                target.classList.add('open');
-                icon.style.transform = 'rotate(180deg)';
+                target.classList.add('open'); icon.style.transform = 'rotate(180deg)';
                 if(btn.dataset.bg) document.body.style.background = btn.dataset.bg;
             }
         };
     });
 
-    // 4. 重新绑定自定义保存按钮的事件
+    // 4. 自定义保存
     $('modal-save').onclick = () => {
         const name = $('app-name').value.trim(); let url = $('app-url').value.trim();
         if (!name || !url) return alert('请填写完整信息');
         if (!url.startsWith('http')) url = 'https://' + url;
         apps.push({ name, url }); saveApps(); 
-        $('app-name').value = ''; $('app-url').value = ''; // 清空
-        document.getElementById('cat-custom').classList.remove('open'); // 收起面板
+        $('app-name').value = ''; $('app-url').value = ''; 
+        document.getElementById('cat-custom').classList.remove('open'); 
         document.querySelector('button[data-target="cat-custom"] svg').style.transform = 'rotate(0deg)';
-        applyBackground(); // 恢复背景
+        applyBackground(); 
     };
 }
 
@@ -175,17 +164,8 @@ window.addPresetSite = function(btn, name, url) {
     setTimeout(() => { renderAccordionPresets(); }, 800);
 };
 
-// ==========================================
-// 全局事件与初始化
-// ==========================================
-$('add-app-btn').onclick = () => {
-    renderAccordionPresets(); 
-    $('modal').classList.replace('hidden', 'flex');
-};
-$('modal-close-x').onclick = () => {
-    $('modal').classList.replace('flex', 'hidden');
-    applyBackground();
-};
+$('add-app-btn').onclick = () => { renderAccordionPresets(); $('modal').classList.replace('hidden', 'flex'); };
+$('modal-close-x').onclick = () => { $('modal').classList.replace('flex', 'hidden'); applyBackground(); };
 $('settings-btn').onclick = () => $('settings-panel').classList.toggle('hidden');
 document.addEventListener('click', e => {
     const panel = $('settings-panel'), btn = $('settings-btn');
@@ -222,5 +202,4 @@ function doSearch() { const kw = $('search-input').value.trim(); if (kw) window.
 $('search-btn').onclick = doSearch;
 $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
 
-// 启动
 applyBackground(); renderApps();
