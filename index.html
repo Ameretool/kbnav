@@ -35,7 +35,6 @@
         html:not(.dark) body::before {
             background: rgba(255, 255, 255, 0.3);
         }
-
         .glass {
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(16px);
@@ -48,9 +47,11 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
         ::-webkit-scrollbar { width: 0px; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen text-gray-800 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-10 px-3 md:px-8">
+<body class="min-h-screen text-gray-800 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-20 px-3 md:px-8">
 
     <!-- 顶部标题区 -->
     <div class="text-center mb-8 md:mb-12 flex flex-col items-center justify-center gap-1 md:gap-3 w-full max-w-4xl">
@@ -71,39 +72,45 @@
             <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-36 md:w-48 glass rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 overflow-hidden">
             </div>
         </div>
-
-        <input type="text" id="search-input" 
-            class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Enter search content...">
-        
+        <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500 dark:placeholder-gray-400" placeholder="Enter search content...">
         <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-primary text-white rounded-full hover:bg-indigo-600 transition shadow-lg flex items-center justify-center">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </button>
     </div>
 
     <!-- 快捷链接区域 -->
-    <div class="w-full max-w-4xl mt-10 md:mt-16 z-10">
+    <div class="w-full max-w-5xl mt-10 md:mt-16 z-10">
         <h2 class="text-sm md:text-base font-semibold mb-4 opacity-90 flex items-center gap-2" id="app-title">
             My Apps
         </h2>
+        <div id="app-grid"></div>
         
-        <div id="app-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            <button id="add-app-btn" class="glass rounded-xl p-3 flex items-center justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 transition border-dashed border border-gray-400 dark:border-gray-500 cursor-pointer min-h-[64px]">
-                <span class="text-lg opacity-50">+</span>
-                <span class="text-xs font-medium opacity-70" id="add-btn-text">Add New</span>
+        <div class="mt-6 flex justify-center">
+             <button id="add-app-btn" class="glass rounded-xl px-6 py-2 flex items-center justify-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition border-dashed border border-gray-400 dark:border-gray-500 cursor-pointer text-sm opacity-80">
+                <span class="text-lg">+</span>
+                <span id="add-btn-text">Add New</span>
             </button>
         </div>
     </div>
 
-    <!-- 右下角设置 -->
+    <!-- 右下角设置按钮 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
         <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
         
         <!-- 设置面板 -->
-        <div id="settings-panel" class="absolute bottom-14 right-0 w-64 md:w-72 glass rounded-2xl p-4 shadow-2xl hidden flex-col gap-4 border border-white/20">
-            <div class="flex justify-between items-center">
+        <div id="settings-panel" class="absolute bottom-14 right-0 w-72 glass rounded-2xl p-5 shadow-2xl hidden flex-col gap-5 border border-white/20 max-h-[80vh] overflow-y-auto hide-scrollbar">
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium" id="set-layout">Layout Style</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="grid">Grid</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="banner">Banner</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="list">List</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center border-t border-gray-400/30 pt-4">
                 <span class="text-sm font-medium" id="set-lang">Language</span>
                 <button id="toggle-lang" class="px-2 py-1 bg-black/10 dark:bg-white/10 rounded text-xs hover:bg-black/20 transition">EN / 中</button>
             </div>
@@ -114,21 +121,14 @@
                 </button>
             </div>
             
-            <!-- 背景设置区 -->
-            <div class="flex flex-col gap-2 pt-3 border-t border-gray-400/30">
+            <div class="flex flex-col gap-2 border-t border-gray-400/30 pt-4">
                 <span class="text-sm font-medium" id="set-bg">Background</span>
-                
-                <!-- 预设渐变色块 -->
                 <div class="flex justify-between gap-2 px-1 my-1" id="gradient-presets">
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')" title="Deep Space"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')" title="Ocean"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')" title="Sunset"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);" onclick="setBgPreset('linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)')" title="Sky"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);" onclick="setBgPreset('linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')" title="Light"></button>
-                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #000000 0%, #434343 100%);" onclick="setBgPreset('linear-gradient(135deg, #000000 0%, #434343 100%)')" title="Black"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%);" onclick="setBgPreset('linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);" onclick="setBgPreset('linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);" onclick="setBgPreset('linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)')"></button>
+                    <button class="w-6 h-6 rounded-full shadow-md border border-white/30 hover:scale-110 transition" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);" onclick="setBgPreset('linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)')"></button>
                 </div>
-
-                <!-- 图片上传 -->
                 <div class="flex gap-2 mt-1">
                     <label class="w-full text-center cursor-pointer bg-black/10 dark:bg-white/10 rounded-md py-1.5 text-xs hover:bg-black/20 transition">
                         <span id="bg-upload-text">Upload Custom Img</span>
@@ -137,9 +137,8 @@
                 </div>
             </div>
 
-            <!-- 🌟 新增：恢复默认按钮 -->
-            <div class="pt-3 border-t border-gray-400/30 mt-1">
-                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20" id="reset-text">
+            <div class="border-t border-gray-400/30 pt-4">
+                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20">
                     Reset All Data
                 </button>
             </div>
@@ -147,40 +146,115 @@
     </div>
 
     <!-- 添加链接模态框 -->
-    <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center px-4">
-        <div class="glass p-5 rounded-xl w-full max-w-sm shadow-2xl">
+    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center px-4">
+        <div class="glass p-5 md:p-6 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
             <h3 class="text-lg font-bold mb-4" id="modal-title">Add New App</h3>
-            <input type="text" id="app-name" placeholder="Name" class="w-full bg-black/10 dark:bg-white/10 rounded px-3 py-2 mb-3 outline-none text-sm">
-            <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded px-3 py-2 mb-5 outline-none text-sm">
-            <div class="flex justify-end gap-2">
-                <button id="modal-cancel" class="px-3 py-1.5 rounded hover:bg-black/10 text-sm">Cancel</button>
-                <button id="modal-save" class="px-3 py-1.5 bg-primary text-white rounded hover:bg-indigo-600 text-sm shadow">Save</button>
+            
+            <div class="mb-4">
+                <p class="text-xs opacity-70 mb-2" id="preset-title">Quick Add (Popular Sites)</p>
+                <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto hide-scrollbar p-1" id="preset-box">
+                </div>
+            </div>
+
+            <div class="border-t border-gray-400/30 pt-4 flex flex-col gap-3">
+                <input type="text" id="app-name" placeholder="Name (Custom)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2 outline-none text-sm">
+                <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2 outline-none text-sm">
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="modal-cancel" class="px-4 py-2 rounded-lg hover:bg-black/10 text-sm">Cancel</button>
+                <button id="modal-save" class="px-5 py-2 bg-primary text-white rounded-lg hover:bg-indigo-600 text-sm shadow">Save</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. 语言包 ---
-        const i18n = {
-            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", cancel: "Cancel", save: "Save", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
-            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", cancel: "取消", save: "保存", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
+        // 🌟 1. 核心：双保险存储引擎 (Cookie + LocalStorage)
+        // 专门解决手机浏览器切换“电脑版/手机版”导致数据丢失的问题
+        const storage = {
+            set: function(key, value) {
+                try { localStorage.setItem(key, value); } catch(e) {}
+                // 写入 Cookie，有效期 1 年，路径根目录
+                document.cookie = `${key}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+            },
+            get: function(key) {
+                let val = null;
+                try { val = localStorage.getItem(key); } catch(e) {}
+                if (!val) {
+                    // 如果 LocalStorage 没有，从 Cookie 里找
+                    const match = document.cookie.match(new RegExp('(^| )' + key + '=([^;]+)'));
+                    if (match) val = decodeURIComponent(match[2]);
+                }
+                return val;
+            },
+            remove: function(key) {
+                try { localStorage.removeItem(key); } catch(e) {}
+                // 删除 Cookie
+                document.cookie = `${key}=; max-age=-1; path=/`;
+            },
+            clear: function() {
+                try { localStorage.clear(); } catch(e) {}
+                // 清空所有 Cookie
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+            }
         };
-        let currentLang = localStorage.getItem('lang') || 'en';
 
-        // --- 2. 搜索引擎 ---
+        // --- 语言包 ---
+        const i18n = {
+            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", presetTitle: "Quick Add (Popular Sites)", cancel: "Cancel", save: "Save", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
+            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", presetTitle: "快捷添加（精选常用网站）", cancel: "取消", save: "保存", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
+        };
+        // 使用引擎读取语言
+        let currentLang = storage.get('lang') || 'en';
+
+        // --- 搜索引擎 ---
         const engines = [
             { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=', icon: '🌐' },
             { id: 'bing', name: 'Bing', url: 'https://www.bing.com/search?q=', icon: '🅱️' },
             { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: '🦆' },
-            { id: 'yahoo', name: 'Yahoo', url: 'https://search.yahoo.com/search?p=', icon: '🟣' },
-            { id: 'yandex', name: 'Yandex', url: 'https://yandex.com/search/?text=', icon: '🇷🇺' },
             { id: 'baidu', name: 'Baidu 百度', url: 'https://www.baidu.com/s?wd=', icon: '🐾' },
-            { id: 'wiki', name: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Special:Search?search=', icon: '📖' }
+            { id: 'github', name: 'GitHub', url: 'https://github.com/search?q=', icon: '🐙' }
         ];
         let currentEngine = engines[0];
         const $ = id => document.getElementById(id);
 
-        // --- 3. 时间 ---
+        // --- 预设常用网站库 ---
+        const presetSites = [
+            { name: 'GitHub', url: 'https://github.com' },
+            { name: 'YouTube', url: 'https://youtube.com' },
+            { name: 'Bilibili', url: 'https://bilibili.com' },
+            { name: 'ChatGPT', url: 'https://chatgpt.com' },
+            { name: 'Google', url: 'https://google.com' },
+            { name: 'Gmail', url: 'https://mail.google.com' },
+            { name: 'Twitter/X', url: 'https://x.com' },
+            { name: 'Reddit', url: 'https://reddit.com' },
+            { name: 'Netflix', url: 'https://netflix.com' },
+            { name: 'Notion', url: 'https://notion.so' },
+            { name: 'Figma', url: 'https://figma.com' },
+            { name: 'Vercel', url: 'https://vercel.com' },
+            { name: 'Cloudflare', url: 'https://dash.cloudflare.com' },
+            { name: '知乎', url: 'https://zhihu.com' },
+            { name: '微博', url: 'https://weibo.com' }
+        ];
+
+        // --- 状态管理 (利用引擎读取) ---
+        let currentLayout = storage.get('layout') || 'grid';
+        const defaultApps = [
+            { name: 'GitHub', url: 'https://github.com' },
+            { name: 'YouTube', url: 'https://youtube.com' },
+            { name: 'Bilibili', url: 'https://bilibili.com' },
+            { name: 'ChatGPT', url: 'https://chatgpt.com' }
+        ];
+        // 使用引擎读取 apps，并加入容错（防止老版本数据格式不对报错）
+        let apps = defaultApps;
+        try {
+            const savedApps = storage.get('myApps');
+            if(savedApps) apps = JSON.parse(savedApps);
+        } catch(e) { console.error("Parse apps failed, use default"); }
+
+        // --- 时间与基础 UI ---
         function updateClock() {
             const now = new Date();
             $('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -189,94 +263,81 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 4. 语言渲染 ---
         function applyLang() {
             const d = i18n[currentLang];
             $('search-input').placeholder = d.placeholder;
             $('app-title').textContent = d.appTitle;
             $('add-btn-text').textContent = d.addBtn;
+            $('set-layout').textContent = d.setLayout;
             $('set-lang').textContent = d.setLang;
             $('set-theme').textContent = d.setTheme;
             $('set-bg').textContent = d.setBg;
             $('bg-upload-text').textContent = d.bgUpload;
-            $('reset-text').textContent = d.resetBtn;
+            $('reset-btn').textContent = d.resetBtn;
             $('modal-title').textContent = d.modalTitle;
+            $('preset-title').textContent = d.presetTitle;
             $('modal-cancel').textContent = d.cancel;
             $('modal-save').textContent = d.save;
         }
 
-        // --- 5. 搜索引擎下拉 ---
-        function renderEngines() {
-            const list = $('engine-dropdown');
-            list.innerHTML = '';
-            engines.forEach(eng => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left px-3 py-2 hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2 text-xs md:text-sm";
-                btn.innerHTML = `<span>${eng.icon}</span> ${eng.name}`;
-                btn.onclick = () => {
-                    currentEngine = eng;
-                    $('current-engine-icon').textContent = eng.icon;
-                    $('engine-dropdown').classList.add('opacity-0', 'invisible');
-                };
-                list.appendChild(btn);
-            });
-        }
-
-        // --- 6. 搜索逻辑 ---
-        function doSearch() {
-            const kw = $('search-input').value.trim();
-            if (!kw) return;
-            window.open(currentEngine.url + encodeURIComponent(kw), '_blank');
-        }
-        $('search-btn').onclick = doSearch;
-        $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
-
-        // --- 7. 快捷链接图标逻辑 ---
-        function getDomain(url) {
-            try { return new URL(url).hostname; } catch (e) { return ''; }
-        }
-
-        function getFaviconHTML(app) {
-            const domain = getDomain(app.url);
-            const iconUrl = `https://api.iowen.cn/favicon/${domain}.png`;
-            const firstLetter = app.name.charAt(0).toUpperCase();
+        // --- 渲染 APP 卡片 ---
+        function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
+        
+        function getIcon(url, size="w-8 h-8", textSize="text-xs") {
+            const domain = getDomain(url);
             return `
-                <div class="w-8 h-8 rounded-lg bg-white/30 dark:bg-black/30 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
-                    <img src="${iconUrl}" class="w-full h-full object-contain hidden" 
+                <div class="${size} rounded-lg bg-white/30 dark:bg-black/30 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
+                    <img src="https://api.iowen.cn/favicon/${domain}.png" class="w-full h-full object-contain hidden" 
                          onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden');"
                          onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
-                    <span class="text-xs font-bold opacity-70 hidden">${firstLetter}</span>
+                    <span class="font-bold opacity-70 hidden ${textSize}">${url.replace(/^https?:\/\//, '').charAt(0).toUpperCase()}</span>
                 </div>
             `;
         }
 
-        // --- 8. 应用列表管理 ---
-        const defaultApps = [
-            { name: 'GitHub', url: 'https://github.com' },
-            { name: 'YouTube', url: 'https://youtube.com' },
-            { name: 'Bilibili', url: 'https://bilibili.com' },
-            { name: 'ChatGPT', url: 'https://chatgpt.com' }
-        ];
-        let apps = JSON.parse(localStorage.getItem('myApps')) || defaultApps;
-
         function renderApps() {
             const grid = $('app-grid');
-            const addBtn = $('add-app-btn');
+            grid.className = ''; 
             grid.innerHTML = '';
             
+            if (currentLayout === 'grid') {
+                grid.className = "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6";
+            } else if (currentLayout === 'banner') {
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4";
+            } else if (currentLayout === 'list') {
+                grid.className = "flex flex-col gap-2 max-w-2xl mx-auto";
+            }
+
             apps.forEach((app, index) => {
                 const card = document.createElement('div');
-                card.className = "glass rounded-xl p-2.5 flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-xl transition-all cursor-pointer group relative min-h-[60px] overflow-hidden";
                 card.onclick = () => window.open(app.url, '_blank');
+                card.title = app.name;
+
+                if (currentLayout === 'grid') {
+                    card.className = "flex flex-col items-center justify-center gap-1.5 cursor-pointer group relative p-2 hover:bg-white/10 dark:hover:bg-black/20 rounded-xl transition";
+                    card.innerHTML = `
+                        ${getIcon(app.url, "w-12 h-12 md:w-14 md:h-14", "text-lg")}
+                        <span class="text-[11px] md:text-xs font-medium text-center w-full truncate opacity-90">${app.name}</span>
+                        <button class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn" data-index="${index}">✕</button>
+                    `;
+                } else if (currentLayout === 'banner') {
+                    card.className = "glass rounded-xl p-3 flex items-center gap-3 cursor-pointer group relative hover:-translate-y-1 hover:shadow-xl transition-all";
+                    card.innerHTML = `
+                        ${getIcon(app.url, "w-8 h-8", "text-sm")}
+                        <span class="font-medium text-sm truncate flex-1">${app.name}</span>
+                        <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>
+                    `;
+                } else if (currentLayout === 'list') {
+                    card.className = "glass rounded-lg px-4 py-2 flex items-center gap-4 cursor-pointer group relative hover:bg-black/5 dark:hover:bg-white/10 transition";
+                    card.innerHTML = `
+                        ${getIcon(app.url, "w-6 h-6", "text-xs")}
+                        <span class="font-medium text-sm flex-1">${app.name}</span>
+                        <button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold delete-btn" data-index="${index}">✕</button>
+                    `;
+                }
                 
-                card.innerHTML = `
-                    ${getFaviconHTML(app)}
-                    <span class="font-medium text-xs truncate flex-1">${app.name}</span>
-                    <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>
-                `;
                 grid.appendChild(card);
             });
-            grid.appendChild(addBtn);
 
             document.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.onclick = (e) => {
@@ -285,15 +346,49 @@
                     saveApps();
                 }
             });
+            
+            document.querySelectorAll('.layout-btn').forEach(b => {
+                if(b.dataset.layout === currentLayout) {
+                    b.classList.add('bg-primary', 'text-white', 'border-primary');
+                    b.classList.remove('bg-black/10', 'dark:bg-white/10', 'border-transparent');
+                } else {
+                    b.classList.remove('bg-primary', 'text-white', 'border-primary');
+                    b.classList.add('bg-black/10', 'dark:bg-white/10', 'border-transparent');
+                }
+            });
         }
 
         function saveApps() {
-            localStorage.setItem('myApps', JSON.stringify(apps));
+            storage.set('myApps', JSON.stringify(apps)); // 使用新引擎
             renderApps();
         }
 
-        // --- 9. 模态框 ---
-        $('add-app-btn').onclick = () => $('modal').classList.replace('hidden', 'flex');
+        // --- 弹窗与预设库逻辑 ---
+        function renderPresets() {
+            const presetBox = $('preset-box');
+            presetBox.innerHTML = '';
+            
+            presetSites.forEach(site => {
+                const isAdded = apps.some(a => a.url.includes(getDomain(site.url)));
+                const btn = document.createElement('button');
+                btn.className = `px-2 py-1 rounded-md text-xs border transition ${isAdded ? 'opacity-50 cursor-not-allowed border-gray-500' : 'bg-white/20 dark:bg-black/20 hover:bg-white/40 dark:hover:bg-black/40 border-transparent cursor-pointer'}`;
+                btn.innerHTML = site.name;
+                
+                if(!isAdded) {
+                    btn.onclick = () => {
+                        apps.push(site);
+                        saveApps();
+                        renderPresets();
+                    };
+                }
+                presetBox.appendChild(btn);
+            });
+        }
+
+        $('add-app-btn').onclick = () => {
+            renderPresets();
+            $('modal').classList.replace('hidden', 'flex');
+        };
         $('modal-cancel').onclick = () => {
             $('modal').classList.replace('flex', 'hidden');
             $('app-name').value = ''; $('app-url').value = '';
@@ -308,23 +403,34 @@
             $('modal-cancel').click();
         };
 
-        // --- 10. 设置项 ---
+        // --- 设置面板事件 ---
         $('settings-btn').onclick = () => $('settings-panel').classList.toggle('hidden');
+
+        document.querySelectorAll('.layout-btn').forEach(btn => {
+            btn.onclick = () => {
+                currentLayout = btn.dataset.layout;
+                storage.set('layout', currentLayout); // 使用新引擎
+                renderApps();
+            };
+        });
+
         $('toggle-theme').onclick = () => {
             document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            storage.set('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); // 使用新引擎
         };
-        if (localStorage.theme === 'light') document.documentElement.classList.remove('dark');
+        // 初始化主题从存储读
+        if (storage.get('theme') === 'light') document.documentElement.classList.remove('dark');
 
         $('toggle-lang').onclick = () => {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
-            localStorage.setItem('lang', currentLang);
+            storage.set('lang', currentLang); // 使用新引擎
             applyLang();
         };
 
+        // 背景切换
         function setBgPreset(gradient) {
-            localStorage.setItem('bgColor', gradient);
-            localStorage.removeItem('bgImg');
+            storage.set('bgColor', gradient);
+            storage.remove('bgImg'); // 这里依然用 localStorage 处理大文件
             applyBackground();
         }
 
@@ -333,15 +439,17 @@
             if(!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                localStorage.setItem('bgImg', ev.target.result);
+                // 因为图片太大，Cookie存不下，只能存 LocalStorage
+                try { localStorage.setItem('bgImg', ev.target.result); } catch(err) { alert('Image is too large to save locally.'); }
                 applyBackground();
             };
             reader.readAsDataURL(file);
         });
 
         function applyBackground() {
-            const img = localStorage.getItem('bgImg');
-            const color = localStorage.getItem('bgColor');
+            let img = null;
+            try { img = localStorage.getItem('bgImg'); } catch(e) {} // 背景图依然从 LocalStorage 读
+            const color = storage.get('bgColor'); // 颜色走双引擎
             
             if (img) {
                 document.body.style.backgroundImage = `url('${img}')`;
@@ -352,20 +460,41 @@
             }
         }
 
-        // 🌟 新增：恢复默认逻辑
+        // 恢复默认
         $('reset-btn').onclick = () => {
             if(confirm(i18n[currentLang].resetConfirm)) {
-                localStorage.clear(); // 清空所有本地存储
-                location.reload();    // 刷新页面重新加载
+                storage.clear(); // 清空双引擎
+                location.reload();
             }
         };
 
-        // 初始化
+        // --- 初始化 ---
         applyLang();
-        renderEngines();
-        renderApps();
         applyBackground();
+        renderApps();
+
+        const list = $('engine-dropdown');
+        engines.forEach(eng => {
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left px-3 py-2 hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2 text-xs md:text-sm";
+            btn.innerHTML = `<span>${eng.icon}</span> ${eng.name}`;
+            btn.onclick = () => {
+                currentEngine = eng;
+                $('current-engine-icon').textContent = eng.icon;
+                $('engine-dropdown').classList.add('opacity-0', 'invisible');
+            };
+            list.appendChild(btn);
+        });
         $('current-engine-icon').textContent = currentEngine.icon;
+        
+        function doSearch() {
+            const kw = $('search-input').value.trim();
+            if (!kw) return;
+            window.open(currentEngine.url + encodeURIComponent(kw), '_blank');
+        }
+        $('search-btn').onclick = doSearch;
+        $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
+
     </script>
 </body>
-</html>
+                    </html>
