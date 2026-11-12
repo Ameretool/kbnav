@@ -16,6 +16,7 @@
         }
     </script>
     <style>
+        /* 保证背景图铺满且不晃动 */
         body {
             background-size: cover;
             background-position: center;
@@ -24,34 +25,45 @@
             -webkit-tap-highlight-color: transparent;
             position: relative;
         }
+        /* 自动遮罩层，强制压暗背景，保证文字永远清晰 */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.15); 
+            background: rgba(0, 0, 0, 0.35); /* 默认稍微深一点 */
             z-index: -1;
             transition: background 0.5s;
         }
+        /* 浅色模式下稍微提亮遮罩，但不至于全白 */
         html:not(.dark) body::before {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
+
+        /* 毛玻璃拟态 */
         .glass {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.4);
         }
         .dark .glass {
-            background: rgba(20, 20, 25, 0.6);
+            background: rgba(20, 20, 25, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
+        
         ::-webkit-scrollbar { width: 0px; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        .icon-box { position: relative; overflow: hidden; }
-        .icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+        /* 图标底板 */
+        .icon-box { 
+            position: relative; 
+            overflow: hidden; 
+            background: rgba(255, 255, 255, 0.9); /* 强制白色底板，防黑图看不清 */
+        }
+        .dark .icon-box { background: rgba(255, 255, 255, 0.85); }
+        .icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2px; }
 
         /* 手风琴动画 */
         .accordion-content {
@@ -60,14 +72,18 @@
             transition: max-height 0.3s ease-out;
         }
         .accordion-content.open {
-            max-height: 500px; /* 足够容纳 */
+            max-height: 600px;
             transition: max-height 0.3s ease-in;
         }
+        
+        /* 添加成功的弹跳动画 */
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .animate-pop { animation: pop 0.3s ease; }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 dark:text-gray-100 flex flex-col items-center pt-10 md:pt-20 pb-20 px-3 md:px-8">
 
-    <!-- 顶部标题区 -->
+    <!-- 顶部时间与标题 -->
     <div class="text-center mb-8 md:mb-12 flex flex-col items-center justify-center gap-1 md:gap-3 w-full max-w-4xl">
         <h1 class="text-3xl md:text-5xl font-bold tracking-wider drop-shadow-md">Search Hub</h1>
         <div class="flex items-center justify-center gap-4 text-xl md:text-3xl font-light opacity-90 mt-1 md:mt-2">
@@ -107,7 +123,7 @@
         </div>
     </div>
 
-    <!-- 右下角设置按钮 -->
+    <!-- 右下角设置 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
         <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -120,7 +136,7 @@
                 <div class="grid grid-cols-3 gap-2">
                     <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="grid">Grid</button>
                     <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="banner">Banner</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="list">List</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-black/20 transition border border-transparent" data-layout="pill">Pill</button>
                 </div>
             </div>
 
@@ -159,21 +175,18 @@
         </div>
     </div>
 
-    <!-- 🌟 全新折叠彩色菜单模态框 -->
+    <!-- 折叠彩色菜单模态框 -->
     <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
-        <!-- 移动端从底部弹出的抽屉样式，PC端居中 -->
         <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] md:max-h-[80vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-lg font-bold" id="modal-title">Add New App</h3>
                 <button id="modal-close-x" class="p-2 opacity-50 hover:opacity-100">✕</button>
             </div>
             
-            <!-- 手风琴折叠区域 (可滚动) -->
             <div class="flex-1 overflow-y-auto hide-scrollbar mb-4 pr-1 border-b border-gray-400/20 pb-4" id="accordion-container">
-                <!-- 动态渲染分类折叠菜单 -->
+                <!-- 动态渲染分类 -->
             </div>
 
-            <!-- 自定义输入区 -->
             <div class="flex flex-col gap-3 shrink-0 pt-2">
                 <input type="text" id="app-name" placeholder="Name (Custom)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
                 <input type="url" id="app-url" placeholder="URL (https://...)" class="w-full bg-black/10 dark:bg-white/10 rounded-lg px-3 py-2.5 outline-none text-sm border border-transparent focus:border-primary transition">
@@ -185,7 +198,7 @@
     </div>
 
     <script>
-        // --- 双引擎存储 ---
+        // 双引擎存储
         const storage = {
             set: function(key, value) {
                 try { localStorage.setItem(key, value); } catch(e) {}
@@ -213,8 +226,8 @@
         };
 
         const i18n = {
-            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", cancel: "Cancel", save: "Save", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
-            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", cancel: "取消", save: "Save Custom Link", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
+            en: { placeholder: "Enter search content...", appTitle: "My Apps", addBtn: "Add New", setLayout: "Layout Style", setLang: "Language", setTheme: "Dark Mode", setBg: "Background", bgUpload: "Upload Custom Img", resetBtn: "Reset All Data", modalTitle: "Add New App", cancel: "Cancel", save: "Save Custom Link", resetConfirm: "Are you sure you want to clear all data and restore defaults?" },
+            zh: { placeholder: "输入搜索内容...", appTitle: "我的应用", addBtn: "添加新链接", setLayout: "卡片布局", setLang: "语言 / Language", setTheme: "深色模式", setBg: "背景设置", bgUpload: "上传自定义图片", resetBtn: "清空数据恢复默认", modalTitle: "添加新链接", cancel: "取消", save: "保存自定义链接", resetConfirm: "确定要清空所有自定义数据并恢复默认设置吗？" }
         };
         let currentLang = storage.get('lang') || 'en';
 
@@ -228,7 +241,6 @@
         let currentEngine = engines[0];
         const $ = id => document.getElementById(id);
 
-        // 🌟 彩色分类预设库
         const presetCategories = [
             {
                 category: "AI Tools",
@@ -276,7 +288,7 @@
             }
         ];
 
-        let currentLayout = storage.get('layout') || 'grid';
+        let currentLayout = storage.get('layout') || 'pill'; // 默认改成高级的胶囊模式
         const defaultApps = [
             { name: 'GitHub', url: 'https://github.com' },
             { name: 'YouTube', url: 'https://youtube.com' },
@@ -312,9 +324,9 @@
             $('modal-save').textContent = d.save;
         }
 
-        // --- 图标三级降级逻辑 ---
         function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
         
+        // 图标三级降级，且强制给白色底板
         function getIcon(url, size="w-8 h-8", textSize="text-xs") {
             const domain = getDomain(url);
             const googleIcon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -323,7 +335,7 @@
             const firstLetter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
 
             return `
-                <div class="${size} icon-box rounded-lg bg-white/30 dark:bg-black/30 flex-shrink-0 flex items-center justify-center shadow-sm">
+                <div class="${size} icon-box rounded-lg flex-shrink-0 flex items-center justify-center shadow-sm">
                     <img src="${googleIcon}" 
                          onerror="this.onerror=function(){this.src='${ddgIcon}'; this.onerror=function(){this.src='${horseIcon}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold opacity-70 ${textSize}\\'>${firstLetter}</span>';}};};">
                 </div>
@@ -335,12 +347,14 @@
             grid.className = ''; 
             grid.innerHTML = '';
             
+            // 布局配置
             if (currentLayout === 'grid') {
                 grid.className = "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 md:gap-6";
             } else if (currentLayout === 'banner') {
-                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4";
-            } else if (currentLayout === 'list') {
-                grid.className = "flex flex-col gap-2 w-full";
+                grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4";
+            } else if (currentLayout === 'pill') {
+                // 胶囊布局：极简、高级
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3";
             }
 
             apps.forEach((app, index) => {
@@ -362,12 +376,13 @@
                         <span class="font-medium text-sm truncate flex-1">${app.name}</span>
                         <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>
                     `;
-                } else if (currentLayout === 'list') {
-                    card.className = "glass rounded-lg px-3 py-2.5 flex items-center gap-3 cursor-pointer group relative hover:bg-black/5 dark:hover:bg-white/10 transition w-full";
+                } else if (currentLayout === 'pill') {
+                    // 重点：这就是图二那种高级卡片，半透明背景，悬浮有阴影
+                    card.className = "glass rounded-full px-4 py-2 flex items-center gap-3 cursor-pointer group relative hover:-translate-y-1 hover:shadow-xl hover:bg-white/80 dark:hover:bg-black/80 transition-all";
                     card.innerHTML = `
                         ${getIcon(app.url, "w-6 h-6", "text-xs")}
                         <span class="font-medium text-sm flex-1 truncate">${app.name}</span>
-                        <button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold delete-btn" data-index="${index}">✕</button>
+                        <button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>
                     `;
                 }
                 
@@ -398,21 +413,20 @@
             renderApps();
         }
 
-        // 🌟 渲染彩色手风琴菜单
+        // 渲染彩色手风琴菜单
         function renderAccordionPresets() {
             const container = $('accordion-container');
             container.innerHTML = '';
             
             presetCategories.forEach((cat, idx) => {
                 const wrapper = document.createElement('div');
-                wrapper.className = "mb-3";
+                wrapper.className = "mb-2";
                 
-                // 计算未添加的数量
                 const unaddedSites = cat.sites.filter(site => !apps.some(a => a.url.includes(getDomain(site.url))));
 
                 wrapper.innerHTML = `
                     <button class="w-full flex items-center justify-between p-3 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/5 transition" data-target="cat-${idx}">
-                        <span class="font-semibold text-sm">${cat.category} <span class="text-xs opacity-50 font-normal ml-1">(${unaddedSites.length} left)</span></span>
+                        <span class="font-semibold text-sm">${cat.category} <span class="text-xs opacity-50 font-normal ml-1">(${unaddedSites.length})</span></span>
                         <svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="cat-${idx}" class="accordion-content px-1">
@@ -421,7 +435,7 @@
                                 const isAdded = apps.some(a => a.url.includes(getDomain(site.url)));
                                 return `<button 
                                     class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-500 bg-transparent' : `${cat.color} hover:scale-105 cursor-pointer shadow-sm`}"
-                                    ${isAdded ? 'disabled' : `onclick="addPresetSite('${site.name}', '${site.url}')"`}
+                                    ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.name}', '${site.url}')"`}
                                 >${site.name}</button>`;
                             }).join('')}
                         </div>
@@ -430,7 +444,6 @@
                 container.appendChild(wrapper);
             });
 
-            // 绑定手风琴点击事件
             container.querySelectorAll('button[data-target]').forEach(btn => {
                 btn.onclick = () => {
                     const target = document.getElementById(btn.dataset.target);
@@ -439,10 +452,8 @@
                         target.classList.remove('open');
                         icon.style.transform = 'rotate(0deg)';
                     } else {
-                        // 关闭其他所有
                         container.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
                         container.querySelectorAll('button[data-target] svg').forEach(el => el.style.transform = 'rotate(0deg)');
-                        // 打开当前
                         target.classList.add('open');
                         icon.style.transform = 'rotate(180deg)';
                     }
@@ -450,11 +461,19 @@
             });
         }
 
-        // 全局函数，供 onclick 调用
-        window.addPresetSite = function(name, url) {
+        // 🌟 点击后不仅加进去，还要给按钮加反馈
+        window.addPresetSite = function(btnElement, name, url) {
             apps.push({ name, url });
             saveApps();
-            renderAccordionPresets(); // 重新渲染让按钮变灰
+            
+            // 按钮视觉反馈
+            btnElement.classList.add('animate-pop');
+            btnElement.style.opacity = '0.4';
+            btnElement.style.pointerEvents = 'none';
+            btnElement.innerHTML = '✔ Added';
+            
+            // 延时恢复文字
+            setTimeout(() => { renderAccordionPresets(); }, 1000);
         };
 
         $('add-app-btn').onclick = () => {
@@ -462,7 +481,6 @@
             $('app-name').value = ''; 
             $('app-url').value = '';
             $('modal').classList.replace('hidden', 'flex');
-            // 渲染完毕后稍微延迟一下让动画生效
             setTimeout(() => { document.querySelector('.accordion-content')?.classList.add('open'); }, 50);
         };
 
@@ -508,48 +526,4 @@
         }
 
         $('bg-upload').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-                try { localStorage.setItem('bgImg', ev.target.result); } catch(err) { alert('Image is too large to save locally.'); }
-                applyBackground();
-            };
-            reader.readAsDataURL(file);
-        });
-
-        function applyBackground() {
-            let img = null;
-            try { img = localStorage.getItem('bgImg'); } catch(e) {}
-            const color = storage.get('bgColor');
-            
-            if (img) {
-                document.body.style.backgroundImage = `url('${img}')`;
-                document.body.style.background = `url('${img}') center/cover fixed`; 
-            } else {
-                const defaultGradient = 'linear-gradient(135deg, #1e1e2f 0%, #4a1c40 100%)';
-                document.body.style.background = color || defaultGradient;
-            }
-        }
-
-        $('reset-btn').onclick = () => {
-            if(confirm(i18n[currentLang].resetConfirm)) {
-                storage.clear();
-                location.reload();
-            }
-        };
-
-        // --- 初始化 ---
-        applyLang();
-        applyBackground();
-        renderApps();
-
-        const list = $('engine-dropdown');
-        engines.forEach(eng => {
-            const btn = document.createElement('button');
-            btn.className = "w-full text-left px-3 py-2 hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-2 text-xs md:text-sm";
-            btn.innerHTML = `<span>${eng.icon}</span> ${eng.name}`;
-            btn.onclick = () => {
-                currentEngine = eng;
-                $('current-engine-icon').textContent = eng.icon;
-                $('engine-dropdown').classList.add('opacity-0', 'invisible
+            const file = e.target
