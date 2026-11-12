@@ -9,13 +9,10 @@ const storage = {
     clear: () => { try { localStorage.clear(); } catch(e){} document.cookie.split(";").forEach(c => { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); }); }
 };
 
-// 🌟 自动获取当前域名和路径，动态替换微信分享的绝对路径
+// 动态获取当前域名，补全微信分享的绝对路径
 (function setDynamicOGImage() {
     const currentUrl = window.location.origin + window.location.pathname;
-    // 拼接出绝对路径：比如 https://org.ooo/kbnav/assets/favicon.jpg
     const absoluteImgUrl = currentUrl.endsWith('/') ? currentUrl + 'assets/favicon.jpg' : currentUrl + '/assets/favicon.jpg';
-    
-    // 动态修改 HTML 中的 Meta 标签
     const ogImage = document.getElementById('og-image');
     const twImage = document.getElementById('twitter-image');
     if(ogImage) ogImage.setAttribute('content', absoluteImgUrl);
@@ -37,12 +34,14 @@ const engines = [
 let currentEngine = engines[0];
 const $ = id => document.getElementById(id);
 
+// 字典补全：清空数据等按钮全部英文化
 const i18n = {
     zh: { placeholder: "输入搜索内容...", myApps: "我的应用", addBtn: "添加快捷链接", layout: "卡片布局", theme: "主题外观", bg: "背景设置", upload: "上传自定义图片", reset: "清空数据恢复默认", modalTitle: "快捷添加", customCat: "+ 自定义添加", save: "保存链接", resetConfirm: "确定要清空所有数据吗？" },
     en: { placeholder: "Enter search content...", myApps: "My Apps", addBtn: "Add Shortcut", layout: "Layout", theme: "Appearance", bg: "Background", upload: "Upload Custom Image", reset: "Reset All Data", modalTitle: "Quick Add", customCat: "+ Custom Add", save: "Save Link", resetConfirm: "Are you sure you want to clear all data?" }
 };
 let currentLang = storage.get('lang') || 'zh';
 
+// 分类字典保持完美对应
 const presetCategories = [
     { catZh: "AI 工具", catEn: "AI Tools", bar: "border-l-blue-500", sites: [{n:"ChatGPT",u:"https://chatgpt.com"},{n:"Claude",u:"https://claude.ai"},{n:"Gemini",u:"https://gemini.google.com"}] },
     { catZh: "开发社区", catEn: "Developer", bar: "border-l-green-500", sites: [{n:"GitHub",u:"https://github.com"},{n:"Cloudflare",u:"https://dash.cloudflare.com"},{n:"Vercel",u:"https://vercel.com"}] },
@@ -71,7 +70,10 @@ function applyLanguage() {
     $('upload-text').textContent = dict.upload;
     $('reset-text').textContent = dict.reset;
     $('modal-title').textContent = dict.modalTitle;
+    
+    // 按钮文字逻辑：中文时显示 EN，英文时显示 中
     $('lang-display').textContent = currentLang === 'zh' ? 'EN' : '中';
+    
     if ($('accordion-container').innerHTML !== '') renderAccordionPresets();
 }
 
@@ -134,6 +136,7 @@ function renderAccordionPresets() {
     const container = $('accordion-container');
     container.innerHTML = '';
     presetCategories.forEach((cat, idx) => {
+        // A方案：分类名根据语言切换，但里面的网站名称保留原样
         const catName = currentLang === 'zh' ? cat.catZh : cat.catEn;
         const wrapper = document.createElement('div');
         wrapper.className = "mb-2";
@@ -211,6 +214,7 @@ $('lang-toggle-btn').onclick = () => {
     currentLang = currentLang === 'zh' ? 'en' : 'zh'; 
     storage.set('lang', currentLang); 
     applyLanguage(); 
+    updateClock(); // 强制刷新日期语言
 };
 
 document.addEventListener('click', e => {
@@ -247,7 +251,4 @@ function doSearch() { const kw = $('search-input').value.trim(); if (kw) window.
 $('search-btn').onclick = doSearch;
 $('search-input').addEventListener('keypress', e => { if(e.key === 'Enter') doSearch(); });
 
-// 启动
-applyLanguage(); 
-applyBackground(); 
-renderApps();
+applyLanguage(); applyBackground(); renderApps();
