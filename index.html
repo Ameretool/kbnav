@@ -5,72 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Search Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#6366f1'}}}}</script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#2ea043'}}}}</script>
     <link rel="stylesheet" href="./assets/style.css">
 </head>
-<body class="min-h-screen text-gray-900 dark:text-gray-100 flex flex-col items-center pt-10 pb-20 px-3 md:px-8">
-    <!-- 顶部 -->
+<body class="min-h-screen text-gray-900 dark:text-gray-100 flex flex-col items-center pt-10 pb-20 px-3 md:px-8 transition-colors duration-300">
     <div class="text-center mb-8 flex flex-col items-center justify-center gap-1 w-full max-w-4xl z-10">
-        <h1 class="text-3xl md:text-5xl font-bold tracking-wider drop-shadow-md">Search Hub</h1>
-        <div class="text-xl md:text-3xl font-light opacity-90 mt-1"><span id="clock">00:00</span></div>
-        <p class="text-xs md:text-sm opacity-70" id="date-text">加载中...</p>
+        <h1 class="text-3xl md:text-5xl font-bold tracking-wider">Search Hub</h1>
+        <div class="text-xl md:text-3xl font-light opacity-80 mt-1"><span id="clock">00:00</span></div>
+        <p class="text-xs md:text-sm opacity-60" id="date-text">加载中...</p>
     </div>
+    
     <!-- 搜索框 -->
-    <div class="w-full max-w-2xl glass rounded-full flex items-center shadow-2xl relative z-20 p-1.5 md:p-2">
+    <div class="w-full max-w-2xl bg-white dark:bg-[#161b22] border border-gray-300 dark:border-[#30363d] rounded-full flex items-center shadow-sm relative z-20 p-1.5 md:p-2">
         <div class="relative group shrink-0">
-            <button class="flex items-center gap-1 px-3 py-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition cursor-pointer">
+            <button class="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-[#30363d] rounded-full transition cursor-pointer">
                 <span id="current-engine-icon" class="text-lg">🌐</span>
                 <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-40 dropdown-menu rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden"></div>
+            <div id="engine-dropdown" class="absolute top-full left-0 mt-2 w-40 bg-white dark:bg-[#161b22] border border-gray-200 dark:border-[#30363d] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden"></div>
         </div>
         <input type="text" id="search-input" class="flex-1 min-w-0 bg-transparent border-none outline-none px-2 py-1 text-sm md:text-base placeholder-gray-500" placeholder="输入搜索内容...">
-        <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-primary text-white rounded-full hover:bg-indigo-600 transition shadow-lg flex items-center justify-center">
+        <button id="search-btn" class="shrink-0 p-2 md:p-2.5 mr-0.5 bg-[#2ea043] text-white rounded-full hover:bg-[#238636] transition shadow-sm flex items-center justify-center">
             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </button>
     </div>
+
     <!-- 列表 -->
     <div class="w-full max-w-5xl mt-10 z-10 px-1 md:px-0">
         <h2 class="text-sm font-semibold mb-4 opacity-90">我的应用</h2>
         <div id="app-grid"></div>
         <div class="mt-8 flex justify-center">
-             <button id="add-app-btn" class="glass rounded-xl px-6 py-2.5 flex items-center justify-center gap-2 hover:bg-black/5 transition border-dashed border-2 border-gray-400 cursor-pointer text-sm font-medium opacity-80 shadow-sm">
+             <button id="add-app-btn" class="bg-white dark:bg-[#21262d] border border-gray-300 dark:border-[#30363d] rounded-xl px-6 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-[#30363d] transition cursor-pointer text-sm font-medium shadow-sm">
                 <span class="text-lg">+</span><span>添加快捷链接</span>
              </button>
         </div>
     </div>
+
     <!-- 设置 -->
     <div class="fixed bottom-6 right-4 md:right-6 z-50">
-        <button id="settings-btn" class="p-3 md:p-4 bg-primary text-white rounded-full shadow-2xl hover:scale-105 transition-transform">
+        <button id="settings-btn" class="p-3 md:p-4 bg-[#2ea043] text-white rounded-full shadow-lg hover:scale-105 transition-transform">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
-        <div id="settings-panel" class="absolute bottom-14 right-0 w-72 glass rounded-2xl p-5 shadow-2xl hidden flex-col gap-5 border border-white/20 max-h-[80vh] overflow-y-auto hide-scrollbar">
+        <div id="settings-panel" class="absolute bottom-14 right-0 w-72 bg-white dark:bg-[#161b22] border border-gray-200 dark:border-[#30363d] rounded-2xl p-5 shadow-xl hidden flex-col gap-5 max-h-[80vh] overflow-y-auto hide-scrollbar">
             <div class="flex flex-col gap-2">
                 <span class="text-sm font-medium">卡片布局</span>
                 <div class="grid grid-cols-3 gap-2">
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="grid">Grid</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="banner">Banner</button>
-                    <button class="layout-btn text-xs py-2 rounded-lg bg-black/10 hover:bg-black/20 transition" data-layout="pill">Pill</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-gray-100 dark:bg-[#21262d] hover:bg-gray-200 dark:hover:bg-[#30363d] transition" data-layout="grid">Grid</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-gray-100 dark:bg-[#21262d] hover:bg-gray-200 dark:hover:bg-[#30363d] transition" data-layout="banner">Banner</button>
+                    <button class="layout-btn text-xs py-2 rounded-lg bg-gray-100 dark:bg-[#21262d] hover:bg-gray-200 dark:hover:bg-[#30363d] transition" data-layout="pill">Pill</button>
                 </div>
             </div>
-            <div class="flex justify-between items-center border-t border-gray-400/30 pt-4">
+            <div class="flex justify-between items-center border-t border-gray-200 dark:border-[#30363d] pt-4">
                 <span class="text-sm font-medium">主题外观</span>
-                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-primary relative transition-colors"><div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div></button>
+                <button id="toggle-theme" class="w-10 h-5 rounded-full bg-gray-300 dark:bg-[#2ea043] relative transition-colors"><div class="w-3 h-3 rounded-full bg-white absolute top-1 left-1 dark:left-6 transition-all shadow"></div></button>
             </div>
-            <div class="flex flex-col gap-2 border-t border-gray-400/30 pt-4">
+            <div class="flex flex-col gap-2 border-t border-gray-200 dark:border-[#30363d] pt-4">
                 <span class="text-sm font-medium">背景设置</span>
-                <label class="w-full text-center cursor-pointer bg-black/10 rounded-md py-1.5 text-xs hover:bg-black/20 transition">
+                <label class="w-full text-center cursor-pointer bg-gray-100 dark:bg-[#21262d] rounded-md py-1.5 text-xs hover:bg-gray-200 dark:hover:bg-[#30363d] transition">
                     上传自定义图片<input type="file" id="bg-upload" class="hidden" accept="image/*">
                 </label>
             </div>
-            <div class="border-t border-gray-400/30 pt-4">
-                <button id="reset-btn" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg py-2 text-xs font-medium transition border border-red-500/20">清空数据恢复默认</button>
+            <div class="border-t border-gray-200 dark:border-[#30363d] pt-4">
+                <button id="reset-btn" class="w-full bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg py-2 text-xs font-medium transition border border-red-200 dark:border-red-900/50">清空数据恢复默认</button>
             </div>
         </div>
     </div>
+
     <!-- 弹窗 -->
-    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
-        <div class="glass p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh]">
+    <div id="modal" class="fixed inset-0 bg-black/50 z-50 hidden items-end md:items-center justify-center px-0 md:px-4">
+        <div class="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-[#30363d] p-5 md:p-6 rounded-t-3xl md:rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh]">
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-lg font-bold">快捷添加</h3>
                 <button id="modal-close-x" class="p-2 opacity-50 hover:opacity-100">✕</button>
