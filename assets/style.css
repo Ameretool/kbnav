@@ -1,3 +1,4 @@
+/* 基础背景（GitHub 配色） */
 body {
     background-color: #f6f8fa;
     transition: background-color 0.3s ease;
@@ -6,16 +7,33 @@ html.dark body {
     background-color: #0d1117;
 }
 
+/* 隐藏滚动条 */
 ::-webkit-scrollbar { width: 0px; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 
-.icon-box { position: relative; overflow: hidden; background: #fff; }
-.icon-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 2px; }
+/* 图标容器：无边框，圆角 */
+.icon-box { 
+    position: relative; 
+    overflow: hidden; 
+    border-radius: 14px; /* 图二那种圆润感 */
+    background: transparent;
+    transition: transform 0.2s ease; 
+}
+.icon-box img { 
+    position: absolute; 
+    inset: 0; 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; 
+    padding: 2px; 
+}
 
+/* 折叠面板动画 */
 .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
 .accordion-content.open { max-height: 800px; transition: max-height 0.3s ease-in; }
 
+/* 输入框 */
 .custom-input { background: #ffffff; border: 1px solid #d0d7de; color: #24292f; }
 .dark .custom-input { background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; }
 .custom-input:focus { outline: none; border-color: #0969da; box-shadow: 0 0 0 2px rgba(9,105,218,0.2); }
