@@ -43,12 +43,10 @@ setInterval(updateClock, 1000); updateClock();
 
 function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
 
-// 重写图标获取，去掉边框，直接把尺寸放大
-function getIcon(url, size="w-12 h-12 md:w-16 md:h-16", textSize="text-xl") {
+function getIcon(url, size="w-14 h-14 md:w-16 md:h-16", textSize="text-xl") {
     const domain = getDomain(url);
     const img1 = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
     const letter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
-    // 移除了 border，图标如果是透明底直接透出背景
     return `<div class="${size} icon-box flex-shrink-0 flex items-center justify-center">
                 <img src="${img1}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-500 ${textSize}\\'>${letter}</span>';">
             </div>`;
@@ -64,26 +62,21 @@ function renderApps() {
     apps.forEach((app, index) => {
         const card = document.createElement('div');
         card.onclick = () => window.open(app.url, '_blank');
-        
-        // 🌟 核心修改：无边框，背景透明，悬浮时才显示毛玻璃底色
         const hoverEffect = "hover:bg-gray-200/50 dark:hover:bg-[#21262d]/80";
         
         if (currentLayout === 'grid') {
-            // 图二风格的 Grid：纯图标 + 小字，无框
             card.className = `flex flex-col items-center justify-center gap-2 cursor-pointer group relative p-2 rounded-2xl transition-all duration-300 ${hoverEffect}`;
             card.innerHTML = `
                 ${getIcon(app.url)}
                 <span class="text-[12px] md:text-[13px] font-medium text-gray-600 dark:text-gray-400 text-center w-full truncate">${app.name}</span>
                 <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
         } else if (currentLayout === 'banner') {
-            // Banner：水平排列
             card.className = `flex items-center gap-3 cursor-pointer group relative p-3 rounded-xl transition-all duration-300 ${hoverEffect}`;
             card.innerHTML = `
                 ${getIcon(app.url, "w-10 h-10", "text-base")}
                 <span class="font-medium text-sm truncate flex-1 text-gray-700 dark:text-gray-300">${app.name}</span>
                 <button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
         } else {
-            // Pill：胶囊
             card.className = `flex items-center gap-3 cursor-pointer group relative px-4 py-2 rounded-full transition-all duration-300 ${hoverEffect}`;
             card.innerHTML = `
                 ${getIcon(app.url, "w-8 h-8", "text-sm")}
@@ -93,20 +86,18 @@ function renderApps() {
         grid.appendChild(card);
     });
     
-    // 删除按钮绑定
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.onclick = (e) => { e.stopPropagation(); apps.splice(parseInt(btn.getAttribute('data-index')), 1); saveApps(); }
     });
     
-    // 布局按钮高亮
+    // 布局按钮高亮：改成 slate-600
     document.querySelectorAll('.layout-btn').forEach(b => {
-        if(b.dataset.layout === currentLayout) { b.classList.add('bg-[#2ea043]', 'text-white'); b.classList.remove('bg-gray-100', 'dark:bg-[#21262d]'); }
-        else { b.classList.remove('bg-[#2ea043]', 'text-white'); b.classList.add('bg-gray-100', 'dark:bg-[#21262d]'); }
+        if(b.dataset.layout === currentLayout) { b.classList.add('bg-[#475569]', 'text-white'); b.classList.remove('bg-gray-200/50', 'dark:bg-[#21262d]'); }
+        else { b.classList.remove('bg-[#475569]', 'text-white'); b.classList.add('bg-gray-200/50', 'dark:bg-[#21262d]'); }
     });
 }
 function saveApps() { storage.set('myApps', JSON.stringify(apps)); renderApps(); }
 
-// 折叠面板渲染 (保持不变)
 function renderAccordionPresets() {
     const container = $('accordion-container');
     container.innerHTML = '';
@@ -126,7 +117,7 @@ function renderAccordionPresets() {
                 <div class="flex flex-wrap gap-2 pt-3 pb-2">
                     ${cat.sites.map(site => {
                         const isAdded = apps.some(a => a.url.includes(getDomain(site.u)));
-                        return `<button class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-200 dark:border-[#30363d] bg-transparent text-gray-500' : 'bg-white dark:bg-[#161b22] border-gray-300 dark:border-[#30363d] text-gray-700 dark:text-gray-300 hover:border-[#2ea043] hover:text-[#2ea043] cursor-pointer shadow-sm'}" ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.n}', '${site.u}')"`}>${site.n}</button>`;
+                        return `<button class="px-3 py-1.5 rounded-lg text-xs font-medium border transition ${isAdded ? 'opacity-40 cursor-not-allowed border-gray-200 dark:border-[#30363d] bg-transparent text-gray-500' : 'bg-white dark:bg-[#161b22] border-gray-300 dark:border-[#30363d] text-gray-700 dark:text-gray-300 hover:border-[#475569] hover:text-[#475569] cursor-pointer shadow-sm'}" ${isAdded ? 'disabled' : `onclick="addPresetSite(this, '${site.n}', '${site.u}')"`}>${site.n}</button>`;
                     }).join('')}
                 </div>
             </div>`;
@@ -144,7 +135,7 @@ function renderAccordionPresets() {
             <div class="flex flex-col gap-3 pt-3 pb-2">
                 <input type="text" id="app-name" placeholder="名称 (例如：GitHub)" class="custom-input w-full rounded-lg px-3 py-2.5 outline-none text-sm transition">
                 <input type="url" id="app-url" placeholder="网址 (https://...)" class="custom-input w-full rounded-lg px-3 py-2.5 outline-none text-sm transition">
-                <button id="modal-save" class="w-full py-2.5 bg-[#2ea043] text-white rounded-xl hover:bg-[#238636] text-sm font-medium shadow-sm transition">保存链接</button>
+                <button id="modal-save" class="w-full py-2.5 bg-[#475569] text-white rounded-xl hover:bg-[#334155] text-sm font-medium shadow-sm transition">保存链接</button>
             </div>
         </div>`;
     container.appendChild(customWrapper);
