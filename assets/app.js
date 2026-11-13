@@ -34,14 +34,13 @@ const engines = [
 let currentEngine = engines[0];
 const $ = id => document.getElementById(id);
 
-// 字典补全：清空数据等按钮全部英文化
 const i18n = {
-    zh: { placeholder: "输入搜索内容...", myApps: "我的应用", addBtn: "添加快捷链接", layout: "卡片布局", theme: "主题外观", bg: "背景设置", upload: "上传自定义图片", reset: "清空数据恢复默认", modalTitle: "快捷添加", customCat: "+ 自定义添加", save: "保存链接", resetConfirm: "确定要清空所有数据吗？" },
-    en: { placeholder: "Enter search content...", myApps: "My Apps", addBtn: "Add Shortcut", layout: "Layout", theme: "Appearance", bg: "Background", upload: "Upload Custom Image", reset: "Reset All Data", modalTitle: "Quick Add", customCat: "+ Custom Add", save: "Save Link", resetConfirm: "Are you sure you want to clear all data?" }
+    zh: { placeholder: "输入搜索内容...", myApps: "我的应用", addBtn: "添加快捷链接", layout: "卡片布局", theme: "主题外观", textColor: "文字颜色", auto: "自动", forceWhite: "纯白", forceBlack: "纯黑", bg: "背景设置", upload: "上传自定义图片", reset: "清空数据恢复默认", modalTitle: "快捷添加", customCat: "+ 自定义添加", save: "保存链接", resetConfirm: "确定要清空所有数据吗？" },
+    en: { placeholder: "Enter search content...", myApps: "My Apps", addBtn: "Add Shortcut", layout: "Layout", theme: "Appearance", textColor: "Text Color", auto: "Auto", forceWhite: "White", forceBlack: "Black", bg: "Background", upload: "Upload Custom Image", reset: "Reset All Data", modalTitle: "Quick Add", customCat: "+ Custom Add", save: "Save Link", resetConfirm: "Are you sure you want to clear all data?" }
 };
 let currentLang = storage.get('lang') || 'zh';
+let currentTextMode = storage.get('textMode') || 'auto'; // auto, white, black
 
-// 分类字典保持完美对应
 const presetCategories = [
     { catZh: "AI 工具", catEn: "AI Tools", bar: "border-l-blue-500", sites: [{n:"ChatGPT",u:"https://chatgpt.com"},{n:"Claude",u:"https://claude.ai"},{n:"Gemini",u:"https://gemini.google.com"}] },
     { catZh: "开发社区", catEn: "Developer", bar: "border-l-green-500", sites: [{n:"GitHub",u:"https://github.com"},{n:"Cloudflare",u:"https://dash.cloudflare.com"},{n:"Vercel",u:"https://vercel.com"}] },
@@ -66,14 +65,18 @@ function applyLanguage() {
     $('add-btn-text').textContent = dict.addBtn;
     $('layout-title').textContent = dict.layout;
     $('theme-title').textContent = dict.theme;
+    $('text-color-title').textContent = dict.textColor;
     $('bg-title').textContent = dict.bg;
     $('upload-text').textContent = dict.upload;
     $('reset-text').textContent = dict.reset;
     $('modal-title').textContent = dict.modalTitle;
-    
-    // 按钮文字逻辑：中文时显示 EN，英文时显示 中
     $('lang-display').textContent = currentLang === 'zh' ? 'EN' : '中';
     
+    // 更新文字颜色按钮显示
+    if (currentTextMode === 'auto') $('text-color-display').textContent = dict.auto;
+    else if (currentTextMode === 'white') $('text-color-display').textContent = dict.forceWhite;
+    else $('text-color-display').textContent = dict.forceBlack;
+
     if ($('accordion-container').innerHTML !== '') renderAccordionPresets();
 }
 
@@ -86,13 +89,22 @@ setInterval(updateClock, 1000); updateClock();
 
 function getDomain(url) { try { return new URL(url).hostname; } catch (e) { return ''; } }
 
+// 🌟 统一处理文字颜色和阴影的类名
+function getTextColorClass() {
+    if (currentTextMode === 'white') return 'text-white text-shadow-dark';
+    if (currentTextMode === 'black') return 'text-black text-shadow-light';
+    // 自动模式：跟随明暗主题
+    return 'text-gray-700 dark:text-gray-300 text-shadow-auto';
+}
+
 function getIcon(url, size="w-14 h-14 md:w-16 md:h-16", textSize="text-xl") {
     const domain = getDomain(url);
     const img1 = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
     const img2 = `https://icon.horse/icon/${domain}`;
     const letter = url.replace(/^https?:\/\//, '').charAt(0).toUpperCase();
+    const textColor = getTextColorClass();
     return `<div class="${size} icon-box flex-shrink-0 flex items-center justify-center">
-                <img src="${img1}" onerror="this.src='${img2}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold text-gray-700 dark:text-gray-300 ${textSize}\\'>${letter}</span>';};">
+                <img src="${img1}" onerror="this.src='${img2}'; this.onerror=function(){this.style.display='none'; this.parentElement.innerHTML='<span class=\\'font-bold ${textColor} ${textSize}\\'>${letter}</span>';};">
             </div>`;
 }
 
@@ -103,6 +115,8 @@ function renderApps() {
                    "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3";
     grid.innerHTML = '';
     
+    const textColor = getTextColorClass();
+
     apps.forEach((app, index) => {
         const card = document.createElement('div');
         card.onclick = () => window.open(app.url, '_blank');
@@ -110,13 +124,13 @@ function renderApps() {
         
         if (currentLayout === 'grid') {
             card.className = `flex flex-col items-center justify-center gap-2 cursor-pointer group relative p-2 rounded-2xl transition-all duration-300 ${hoverEffect}`;
-            card.innerHTML = `${getIcon(app.url)}<span class="text-[12px] md:text-[13px] font-medium text-gray-600 dark:text-gray-400 text-center w-full truncate">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
+            card.innerHTML = `${getIcon(app.url)}<span class="text-[12px] md:text-[13px] font-medium text-center w-full truncate ${textColor}">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded-md text-[10px] delete-btn shadow-sm" data-index="${index}">✕</button>`;
         } else if (currentLayout === 'banner') {
             card.className = `flex items-center gap-3 cursor-pointer group relative p-3 rounded-xl transition-all duration-300 ${hoverEffect}`;
-            card.innerHTML = `${getIcon(app.url, "w-10 h-10", "text-base")}<span class="font-medium text-sm truncate flex-1 text-gray-700 dark:text-gray-300">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
+            card.innerHTML = `${getIcon(app.url, "w-10 h-10", "text-base")}<span class="font-medium text-sm truncate flex-1 ${textColor}">${app.name}</span><button class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 bg-red-500 text-white rounded text-[10px] delete-btn" data-index="${index}">✕</button>`;
         } else {
             card.className = `flex items-center gap-3 cursor-pointer group relative px-4 py-2 rounded-full transition-all duration-300 ${hoverEffect}`;
-            card.innerHTML = `${getIcon(app.url, "w-8 h-8", "text-sm")}<span class="font-medium text-sm flex-1 truncate text-gray-700 dark:text-gray-300">${app.name}</span><button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>`;
+            card.innerHTML = `${getIcon(app.url, "w-8 h-8", "text-sm")}<span class="font-medium text-sm flex-1 truncate ${textColor}">${app.name}</span><button class="opacity-0 group-hover:opacity-100 p-1 text-red-500 font-bold transition-opacity delete-btn" data-index="${index}">✕</button>`;
         }
         grid.appendChild(card);
     });
@@ -136,7 +150,6 @@ function renderAccordionPresets() {
     const container = $('accordion-container');
     container.innerHTML = '';
     presetCategories.forEach((cat, idx) => {
-        // A方案：分类名根据语言切换，但里面的网站名称保留原样
         const catName = currentLang === 'zh' ? cat.catZh : cat.catEn;
         const wrapper = document.createElement('div');
         wrapper.className = "mb-2";
@@ -214,7 +227,18 @@ $('lang-toggle-btn').onclick = () => {
     currentLang = currentLang === 'zh' ? 'en' : 'zh'; 
     storage.set('lang', currentLang); 
     applyLanguage(); 
-    updateClock(); // 强制刷新日期语言
+    updateClock();
+};
+
+// 🌟 新增：文字颜色切换逻辑
+$('toggle-text-color').onclick = () => {
+    if (currentTextMode === 'auto') currentTextMode = 'white';
+    else if (currentTextMode === 'white') currentTextMode = 'black';
+    else currentTextMode = 'auto';
+    
+    storage.set('textMode', currentTextMode);
+    applyLanguage(); // 更新按钮文字
+    renderApps(); // 重新渲染应用列表应用新颜色
 };
 
 document.addEventListener('click', e => {
