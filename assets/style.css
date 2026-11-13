@@ -19,3 +19,17 @@ html.dark .icon-box { background: rgba(255, 255, 255, 0.08); }
 .dark .custom-input:focus { border-color: #94a3b8; box-shadow: 0 0 0 2px rgba(148,163,184,0.2); }
 @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 .animate-pop { animation: pop 0.3s ease; }
+/* 加在文件最底部 */
+
+/* 自动模式下的文字阴影（浅色背景给浅阴影，深色背景给深阴影） */
+.text-shadow-auto { text-shadow: 0 1px 3px rgba(255,255,255,0.8), 0 0 1px rgba(255,255,255,0.5); }
+.dark .text-shadow-auto { text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 0 1px rgba(0,0,0,0.5); }
+
+/* 强制纯白（字带黑色阴影，适合深色图） */
+.text-shadow-dark { text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.8); }
+
+/* 强制纯黑（字带白色发光阴影，适合亮色图） */
+.text-shadow-light { text-shadow: 0 1px 4px rgba(255,255,255,0.9), 0 0 2px rgba(255,255,255,0.8); }
+
+/* 顶部标题时间文字也加上防隐身阴影 */
+h1, #clock, #date-text { text-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(255,255,255,0.4); }
